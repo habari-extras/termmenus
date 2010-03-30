@@ -82,12 +82,10 @@ class TermMenus extends Plugin
 	 **/
 	public function action_block_form_menu($form, $block)
 	{
-		$vocabs = Vocabulary::get_all();
-		$vocab_array = array();
-		foreach($vocabs as $vocab) {
-			$vocab_array[$vocab->id] = $vocab->name;
-		}
-		$content = $form->append('checkboxes', 'content', $block, _t( 'Menu Vocabularies' ), $vocab_array );
+		// This gets the right menu, but doesn't output a draggable menu editor
+		$vocab = Vocabulary::get('menu_' . Utils::slugify($block->title, '_') );
+		$form->append('select', 'menu', $block, _t( 'Menu Taxonomy' ), $vocab->get_options());
+
 		$form->append('submit', 'save', 'Save');
 	}
 
