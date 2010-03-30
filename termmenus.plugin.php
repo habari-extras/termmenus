@@ -34,15 +34,27 @@ class TermMenus extends Plugin
 		if ( Plugins::id_from_file($file) == Plugins::id_from_file(__FILE__) ) {
 			// delete default access token
 			ACL::destroy_token( 'manage_menus' );
+
+			// delete menu vocabularies that were created
+			$vocabs = Vocabulary::get_all();
+			foreach($vocabs as $vocab) {
+				$vocab->delete();
+			}
+
+			// delete blocks that were created
+			$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
+			foreach($blocks as $block) {
+				$block->delete();
+			}
 		}
 	}
 
 	/**
 	 * Create a vocabulary for any saved menu block
 	 **/
-	function block_update_after($block)
+	function action_block_update_after($block)
 	{
-		$vocab_name = 'menu_' . Utils::slugify($block->title);
+		$vocab_name = 'menu_' . Utils::slugify($block->title, '_');
 
 		if(!Vocabulary::exists($vocab_name)) {
 			$params = array(
@@ -70,8 +82,12 @@ class TermMenus extends Plugin
 	 **/
 	public function action_block_form_menu($form, $block)
 	{
-		$content = $form->append('textarea', 'content', $block, _t( 'Menus!' ) );
-		$content->rows = 5;
+		$vocabs = Vocabulary::get_all();
+		$vocab_array = array();
+		foreach($vocabs as $vocab) {
+			$vocab_array[$vocab->id] = $vocab->name;
+		}
+		$content = $form->append('checkboxes', 'content', $block, _t( 'Menu Vocabularies' ), $vocab_array );
 		$form->append('submit', 'save', 'Save');
 	}
 
@@ -80,18 +96,14 @@ class TermMenus extends Plugin
 	 **/
 	public function action_form_publish ( $form, $post )
 	{
-		$parent_term = null;
-		$descendants = null;
-
-		$settings = $form->publish_controls->append('fieldset', 'settings', _t('Menus'));
-
 		$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
 
 		$blocklist = array();
 		foreach($blocks as $block) {
-			$blocklist['menu_' . Utils::slugify($block->title)] = $block->title;
+			$blocklist['menu_' . Utils::slugify($block->title, '_')] = $block->title;
 		}
 
+		$settings = $form->publish_controls->append('fieldset', 'menu_set', _t('Menus'));
 		$settings->append('checkboxes', 'menus', 'null:null', _t('Menus'), $blocklist);
 
 		// If this is an existing post, see if it has categories already
@@ -106,11 +118,21 @@ class TermMenus extends Plugin
 	 **/
 	public function action_publish_post( $post, $form )
 	{
-		if ( $post->content_type == Post::type( self::$content_type ) ) {
-			$categories = array();
-			$categories = $this->parse_categories( $form->categories->value );
-			$this->vocabulary->set_object_terms( 'post', $post->id, $categories );
+		$term_title = $post->title;
+		foreach($form->menus->value as $menu_vocab_name) {
+			$vocabulary = Vocabulary::get($menu_vocab_name);
+			$term = $vocabulary->get_object_terms('post', $post->id);
+Utils::debug($term, $post->id); die();
+			if(!$term) {
+				$term = new Term(array(
+					'term_display' => $post->title,
+					'term' => $post->slug,
+				));
+				$vocabulary->add_term($term);
+				$vocabulary->set_object_terms('post', $post->id, array($term->term));
+			}
 		}
+		Utils::debug($term); die();
 	}
 
 	/**
