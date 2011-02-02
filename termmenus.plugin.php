@@ -50,9 +50,9 @@ class TermMenus extends Plugin
 	}
 
 	/**
-	 * Create a vocabulary for any saved menu block
+	 * Create a vocabulary for any newly saved menu block
 	 **/
-	function action_block_update_after($block)
+	function action_block_insert_after($block)
 	{
 		$vocab_name = 'menu_' . Utils::slugify($block->title, '_');
 
@@ -120,7 +120,7 @@ class TermMenus extends Plugin
 		foreach($form->menus->value as $menu_vocab_name) {
 			$vocabulary = Vocabulary::get($menu_vocab_name);
 			$term = $vocabulary->get_object_terms('post', $post->id);
-Utils::debug($term, $post->id); die();
+// Utils::debug($post, $post->id); die();
 			if(!$term) {
 				$term = new Term(array(
 					'term_display' => $post->title,
