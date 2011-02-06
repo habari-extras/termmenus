@@ -132,14 +132,6 @@ class TermMenus extends Plugin
 		}
 		Utils::debug($term); die();
 	}
-
-	/**
-	 * Enable update notices to be sent using the Habari beacon
-	 **/
-	public function action_update_check()
-	{
-		Update::add( 'Menus', 'FE473F55-2704-4CF0-B192-38F41268C58E', $this->info->version );
-	}
 }
 
 ?>
