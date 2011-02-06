@@ -9,7 +9,7 @@ class TermMenus extends Plugin
 				if ( !isset($this->_vocabulary) ) {
 					$this->_vocabulary = Vocabulary::get(self::$vocabulary);
 				}
-				return $this->_vocabulary;
+			return $this->_vocabulary;
 		}
 	}
 
@@ -81,7 +81,7 @@ class TermMenus extends Plugin
 	 **/
 	public function filter_block_list($block_list)
 	{
-		$block_list['menu'] = _t('Menu');
+		$block_list['menu'] = _t( 'Menu', 'termmenus' );
 		return $block_list;
 	}
 
@@ -178,18 +178,44 @@ class TermMenus extends Plugin
 
 	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
 	{
-		// get an array of all the menu vocabularies
-		$theme->menu_list = '';
-		$vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
-		foreach ( $vocabularies as $menu ) {
-			$menu_name = $menu->name;
-			$edit_link = URL::get( 'admin', array( 
-				'page' => 'menus',
-				'action' => 'edit',
-				'menu' => $menu_name, // already slugified
-			) );
-			$theme->menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+		$theme->page_content = '';
+		if( isset( $_GET[ 'action' ] ) ) {
+			switch( $_GET[ 'action' ] ) {
+				case 'edit': 
+					$vocabulary = Vocabulary::get( $_GET[ 'menu' ] );
+					if ( $vocabulary == false ) {
+						$theme->page_content = _t( '<h2>Invalid Menu.</h2>', 'termmenus' );
+						// that's it, we're done. Maybe we show the list of menus instead?
+						break;
+					}
+Utils::debug( $vocabulary );
+
+					break;
+				default:
+Utils::debug( $_GET ); die();
+			}
 		}
+		else { // no action - list the menus.
+			$menu_list = '';
+			// get an array of all the menu vocabularies
+			$vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
+			foreach ( $vocabularies as $menu ) {
+				$menu_name = $menu->name;
+				$edit_link = URL::get( 'admin', array( 
+					'page' => 'menus',
+					'action' => 'edit',
+					'menu' => $menu_name, // already slugified
+				) );
+				$menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+			}
+			if ( $menu_list != '' ) {
+				$theme->page_content = "<ul>$menu_list</ul>";
+			}
+			else {
+				$theme->page_content = _t( '<h2>No Menus have been created.</h2>', 'termmenus' );
+			}
+		}
+
 		$theme->display( 'menus_admin' );
 		// End everything
 		exit;
