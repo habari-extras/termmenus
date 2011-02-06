@@ -1,6 +1,6 @@
 <?php	$theme->display( 'header' ); ?>
 	<div class="container">
-<?php 		Utils::debug( $theme->menu_vocabularies ); ?>
+<?php 		echo $theme->menu_list; ?>
 	</div>
 <?php		$theme->display( 'footer' );
 ?>

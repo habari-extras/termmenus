@@ -179,7 +179,17 @@ class TermMenus extends Plugin
 	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
 	{
 		// get an array of all the menu vocabularies
-		$theme->menu_vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
+		$theme->menu_list = '';
+		$vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
+		foreach ( $vocabularies as $menu ) {
+			$menu_name = $menu->name;
+			$edit_link = URL::get( 'admin', array( 
+				'page' => 'menus',
+				'action' => 'edit',
+				'menu' => $menu_name, // already slugified
+			) );
+			$theme->menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+		}
 		$theme->display( 'menus_admin' );
 		// End everything
 		exit;
