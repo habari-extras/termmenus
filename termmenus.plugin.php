@@ -27,6 +27,14 @@ class TermMenus extends Plugin
 	}
 
 	/**
+	 * Register the template
+	 **/
+	public function action_init()
+	{
+		$this->add_template( 'menus_admin', dirname( $this->get_file() ) . '/menus_admin.php' );
+	}
+
+	/**
 	 * Remove the admin token
 	 **/
 	public function action_plugin_deactivation($file)
@@ -132,6 +140,52 @@ class TermMenus extends Plugin
 		}
 		Utils::debug($term); die();
 	}
+
+	public function filter_adminhandler_post_loadplugins_main_menu( $menu ) {
+		// obtain existing last submenu item
+		$last_used = end( $menu[ 'create' ][ 'submenu' ]);
+		// add a menu item at the bottom
+		$menu[ 'create' ][ 'submenu' ][] = array( 
+			'title' => _t( 'Create a new Menu', 'termmenus' ),
+			'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ),
+			'text' => _t( 'Menu', 'termmenus' ),
+			'hotkey' => $last_used[ 'hotkey' ] + 1, // next available hotkey is last used + 1
+		);
+		$last_used = end( $menu[ 'manage' ][ 'submenu' ]);
+		$menu[ 'manage' ][ 'submenu' ][] = array( 
+			'title' => _t( 'Manage Menus', 'termmenus' ),
+			'url' => URL::get( 'admin', 'page=menus' ), // might as well make listing the existing menus the default
+			'text' => _t( 'Menus', 'termmenus' ),
+			'hotkey' => $last_used[ 'hotkey' ] + 1,
+		);
+		return $menu;
+	}
+
+	public function alias()
+	{
+		return array(
+			'action_admin_theme_get_menus' => 'action_admin_theme_post_menus'
+		);
+	}
+
+	public function filter_admin_access( $access, $page, $post_type ) {
+		// this will work for now, but this should use a token.
+		if ( $page != 'menus' ) {
+			return $access;
+		} 
+		return true;
+	}
+
+	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
+	{
+		// get an array of all the menu vocabularies
+		$theme->menu_vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
+		$theme->display( 'menus_admin' );
+		// End everything
+		exit;
+	}
+
+
 }
 
 ?>
