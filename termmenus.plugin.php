@@ -119,7 +119,7 @@ class TermMenus extends Plugin
 	}
 
 	/**
-	 * Process categories when the publish form is received
+	 * Process menus when the publish form is received
 	 *
 	 **/
 	public function action_publish_post( $post, $form )
@@ -141,6 +141,10 @@ class TermMenus extends Plugin
 		Utils::debug($term); die();
 	}
 
+	/**
+	 * Add creation and management links to the main menu
+	 *
+	 **/
 	public function filter_adminhandler_post_loadplugins_main_menu( $menu ) {
 		// obtain existing last submenu item
 		$last_used = end( $menu[ 'create' ][ 'submenu' ]);
@@ -161,6 +165,10 @@ class TermMenus extends Plugin
 		return $menu;
 	}
 
+	/**
+	 * Handle GET and POST requests
+	 *
+	 **/
 	public function alias()
 	{
 		return array(
@@ -168,6 +176,11 @@ class TermMenus extends Plugin
 		);
 	}
 
+	/**
+	 * Restrict access to the admin page
+	 * (until a token is added, restricted merely to authenticated users)
+	 *
+	 **/
 	public function filter_admin_access( $access, $page, $post_type ) {
 		// this will work for now, but this should use a token.
 		if ( $page != 'menus' ) {
@@ -176,6 +189,10 @@ class TermMenus extends Plugin
 		return true;
 	}
 
+	/**
+	 * Prepare and display admin page
+	 *
+	 **/
 	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
 	{
 		$theme->page_content = '';
@@ -188,9 +205,15 @@ class TermMenus extends Plugin
 						// that's it, we're done. Maybe we show the list of menus instead?
 						break;
 					}
-Utils::debug( $vocabulary );
+					$form = new FormUI( 'edit_menu' );
 
+					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
+					$form->append( 'tree', 'tree', $vocabulary->get_root_terms(), _t( 'Menu', 'termmenus') );
+					// append other needed controls, if there are any.
+
+					$theme->page_content = $form->get();
 					break;
+
 				default:
 Utils::debug( $_GET ); die();
 			}
