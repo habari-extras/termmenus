@@ -219,11 +219,16 @@ Utils::debug( $block );
 					}
 					$form = new FormUI( 'edit_menu' );
 
-					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
-					$form->append( 'tree', 'tree', $vocabulary->get_root_terms(), _t( 'Menu', 'termmenus') );
-					$form->tree->value = $vocabulary->get_root_terms();
-					// append other needed controls, if there are any.
-
+					if ( !$vocabulary->is_empty() ) {
+						// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
+						$form->append( 'tree', 'tree', $vocabulary->get_root_terms(), _t( 'Menu', 'termmenus') );
+						$form->tree->value = $vocabulary->get_root_terms();
+						// append other needed controls, if there are any.
+					}
+					else {
+						$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
+						// add another control here to add one by URL, maybe?
+					}
 					$theme->page_content = $form->get();
 					break;
 
