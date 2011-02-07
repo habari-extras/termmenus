@@ -193,17 +193,18 @@ $block->vocabulary = $vocab;
 
 	/**
 	 * Restrict access to the admin page
-	 * (until a token is added, restricted merely to authenticated users)
 	 *
 	 **/
-	public function filter_admin_access( $access, $page, $post_type ) {
-		// this will work for now, but this should use a token.
-		if ( $page != 'menus' ) {
-			return $access;
-		} 
-		return true;
+	public function filter_admin_access_tokens( array $require_any, $page )
+	{
+		switch ( $page ) {
+			case 'menus':
+				$require_any = array( 'manage_menus' => true );
+				break;
+		}
+		return $require_any;
 	}
-
+	
 	/**
 	 * Prepare and display admin page
 	 *
