@@ -27,11 +27,12 @@ class TermMenus extends Plugin
 	}
 
 	/**
-	 * Register the template
+	 * Register the templates - one for the admin page, the other for the block.
 	 **/
 	public function action_init()
 	{
 		$this->add_template( 'menus_admin', dirname( $this->get_file() ) . '/menus_admin.php' );
+		$this->add_template( 'block.menu', dirname( __FILE__ ) . '/block.menu.php' );
 	}
 
 	/**
@@ -106,7 +107,8 @@ class TermMenus extends Plugin
 	 * Populate the block with some content
 	 **/
 	public function action_block_content_menu( $block ) {
-Utils::debug( $block );
+		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
+$block->vocabulary = $vocab;
 	}
 
 	/**
