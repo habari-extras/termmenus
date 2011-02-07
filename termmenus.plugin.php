@@ -45,16 +45,15 @@ class TermMenus extends Plugin
 			ACL::destroy_token( 'manage_menus' );
 
 			// delete menu vocabularies that were created
-			$vocabs = Vocabulary::get_all();
-			foreach($vocabs as $vocab) {
-				// WHOA! Only delete the ones that are menu vocabularies. This is going to wipe out tags, categories, etc.
-
+			$vocabs = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%"', array(), 'Vocabulary' );
+			foreach( $vocabs as $vocab ) {
+				// This should only delete the ones that are menu vocabularies, unless others have been named 'menu_xxxxx'
 				$vocab->delete();
 			}
 
 			// delete blocks that were created
-			$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
-			foreach($blocks as $block) {
+			$blocks = DB::get_results( 'SELECT * FROM {blocks} WHERE type = "menu"', array(), 'Block') ;
+			foreach( $blocks as $block ) {
 				$block->delete();
 			}
 		}
