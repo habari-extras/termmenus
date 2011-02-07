@@ -46,6 +46,8 @@ class TermMenus extends Plugin
 			// delete menu vocabularies that were created
 			$vocabs = Vocabulary::get_all();
 			foreach($vocabs as $vocab) {
+				// WHOA! Only delete the ones that are menu vocabularies. This is going to wipe out tags, categories, etc.
+
 				$vocab->delete();
 			}
 
@@ -91,13 +93,20 @@ class TermMenus extends Plugin
 	/**
 	 * Produce the form to configure a menu
 	 **/
-	public function action_block_form_menu($form, $block)
+	public function action_block_form_menu( $form, $block )
 	{
 		// This gets the right menu, but doesn't output a draggable menu editor
 		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
 		$form->append('select', 'menu', $block, _t( 'Menu Taxonomy' ), $vocab->get_options());
 
 		$form->append('submit', 'save', 'Save');
+	}
+
+	/**
+	 * Populate the block with some content
+	 **/
+	public function action_block_content_menu( $block ) {
+Utils::debug( $block );
 	}
 
 	/**
