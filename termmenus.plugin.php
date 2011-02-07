@@ -62,17 +62,20 @@ class TermMenus extends Plugin
 	 **/
 	function action_block_insert_after($block)
 	{
-		$vocab_name = 'menu_' . Utils::slugify($block->title, '_');
+		// need to check if it's a menu block
+		if ( $block->type == 'menu' ) {
+			$vocab_name = 'menu_' . Utils::slugify( $block->title, '_' );
 
-		if(!Vocabulary::exists($vocab_name)) {
-			$params = array(
-				'name' => $vocab_name,
-				'description' => _t('A vocabulary for the "%s" menu', array($block->title)),
-				'features' => array( 'unique', 'hierarchical' ),
-			);
+			if( !Vocabulary::exists( $vocab_name ) ) {
+				$params = array(
+					'name' => $vocab_name,
+					'description' => _t( 'A vocabulary for the "%s" menu', array( $block->title ) ), // need termmenus domain on this _t
+					'features' => array( 'unique', 'hierarchical' ),
+				);
 
-			$menu_vocab = new Vocabulary( $params );
-			$menu_vocab->insert();
+				$menu_vocab = new Vocabulary( $params );
+				$menu_vocab->insert();
+			}
 		}
 	}
 
@@ -91,7 +94,7 @@ class TermMenus extends Plugin
 	public function action_block_form_menu($form, $block)
 	{
 		// This gets the right menu, but doesn't output a draggable menu editor
-		$vocab = Vocabulary::get('menu_' . Utils::slugify($block->title, '_') );
+		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
 		$form->append('select', 'menu', $block, _t( 'Menu Taxonomy' ), $vocab->get_options());
 
 		$form->append('submit', 'save', 'Save');
