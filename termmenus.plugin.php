@@ -116,7 +116,8 @@ $block->vocabulary = $vocab;
 	 **/
 	public function action_form_publish ( $form, $post )
 	{
-		$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
+//		$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
+		$blocks = DB::get_results('SELECT * FROM {blocks} WHERE type = "menu"', array(), 'Block');
 
 		$blocklist = array();
 		foreach($blocks as $block) {
@@ -223,14 +224,15 @@ $block->vocabulary = $vocab;
 
 					if ( !$vocabulary->is_empty() ) {
 						// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
-						$form->append( 'tree', 'tree', $vocabulary->get_root_terms(), _t( 'Menu', 'termmenus') );
-						$form->tree->value = $vocabulary->get_root_terms();
+						$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
+//						$form->tree->value = $vocabulary->get_root_terms();
 						// append other needed controls, if there are any.
 					}
 					else {
 						$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
 						// add another control here to add one by URL, maybe?
 					}
+					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 					$theme->page_content = $form->get();
 					break;
 
