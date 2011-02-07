@@ -221,6 +221,7 @@ Utils::debug( $block );
 
 					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
 					$form->append( 'tree', 'tree', $vocabulary->get_root_terms(), _t( 'Menu', 'termmenus') );
+					$form->tree->value = $vocabulary->get_root_terms();
 					// append other needed controls, if there are any.
 
 					$theme->page_content = $form->get();
