@@ -106,8 +106,9 @@ class TermMenus extends Plugin
 	 * Populate the block with some content
 	 **/
 	public function action_block_content_menu( $block ) {
-		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
-$block->vocabulary = $vocab;
+		$v = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
+		$block->content = Format::term_tree( $v->get_tree(), $v->name, '%s', '<ol style="#menu">', '</ol>', array( $this, 'render_menu_item' ) );
+
 	}
 
 	/**
