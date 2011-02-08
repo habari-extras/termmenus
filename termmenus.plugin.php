@@ -266,6 +266,16 @@ Utils::debug( $_GET ); die();
 		exit;
 	}
 
+	/**
+	 * Callback function for block output
+	 *
+	 **/
+	public function render_menu_item( $term, $wrapper )
+	{
+		$title = $term->display_term;
+		$link = URL::get( 'display_post', array( 'slug', $term->term ) );
+		return "<a href='$link' title='$title'>$title</a>";
+	}
 
 }
 
