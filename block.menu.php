@@ -1,3 +1,1 @@
-<?php 
-echo $content->content;
-?>
+<?php echo $content->content; ?>

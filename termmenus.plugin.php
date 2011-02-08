@@ -106,9 +106,9 @@ class TermMenus extends Plugin
 	 * Populate the block with some content
 	 **/
 	public function action_block_content_menu( $block ) {
-		$v = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
-		$block->content = Format::term_tree( $v->get_tree(), $v->name, '%s', '<ol style="#menu">', '</ol>', array( $this, 'render_menu_item' ) );
-
+		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
+		$block->vocabulary = $vocab;
+		$block->content = Format::term_tree( $vocab->get_tree(), $vocab->name, array( $this, 'render_menu_item' ) );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class TermMenus extends Plugin
 				$vocabulary->set_object_terms('post', $post->id, array($term->term));
 			}
 		}
-		Utils::debug($term); die();
+		//Utils::debug($term); die();
 	}
 
 	/**
@@ -273,8 +273,10 @@ Utils::debug( $_GET ); die();
 	 **/
 	public function render_menu_item( $term, $wrapper )
 	{
-		$title = $term->display_term;
-		$link = URL::get( 'display_post', array( 'slug', $term->term ) );
+		$title = $term->term_display;
+		$post_ids = $term->objects('post');
+		$post = Post::get(array('id' =>reset($post_ids)));
+		$link = URL::get( 'display_post', array( 'slug' => $post->slug ) );
 		return "<a href='$link' title='$title'>$title</a>";
 	}
 
