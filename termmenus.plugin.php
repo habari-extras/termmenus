@@ -31,7 +31,7 @@ class TermMenus extends Plugin
 	 **/
 	public function action_init()
 	{
-		$this->add_template( 'menus_admin', dirname( $this->get_file() ) . '/menus_admin.php' );
+		$this->add_template( 'menus_admin', dirname( __FILE__ ) . '/menus_admin.php' );
 		$this->add_template( 'block.menu', dirname( __FILE__ ) . '/block.menu.php' );
 	}
 
