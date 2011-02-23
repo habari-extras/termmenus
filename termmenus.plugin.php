@@ -277,7 +277,7 @@ Utils::debug( $_GET ); die();
 		$post_ids = $term->objects('post');
 		$post = Post::get(array('id' =>reset($post_ids)));
 		$link = URL::get( 'display_post', array( 'slug' => $post->slug ) );
-		return "<a href='$link' title='$title'>$title</a>";
+		return "<a href='$link'>$title</a>";
 	}
 
 }
