@@ -78,6 +78,8 @@ class TermMenus extends Plugin
 	public function action_block_form_menu( $form, $block )
 	{
 		$form->append('select', 'menu_taxonomy', $block, _t( 'Menu Taxonomy' ), $this->get_menus(true));
+		$form->append('checkbox', 'div_wrap', $block, _t( 'Wrap each menu link in a div' ));
+		$form->append('text', 'list_class', $block, _t( 'Custom class for the tree ordered list element' ));
 	}
 
 	/**
@@ -86,7 +88,21 @@ class TermMenus extends Plugin
 	public function action_block_content_menu( $block ) {
 		$vocab = Vocabulary::get_by_id($block->menu_taxonomy);
 		$block->vocabulary = $vocab;
-		$block->content = Format::term_tree( $vocab->get_tree(), $vocab->name, array( $this, 'render_menu_item' ) );
+		if($block->div_wrap) {
+			$wrapper = '<div>%s</div>';
+		}
+		else {
+			$wrapper = '%s';
+		}
+		if($block->list_class == '') {
+			$startlist = '<ol class="tree">';
+		}
+		else {
+			$startlist = '<ol class="' . Utils::slugify($block->list_class) . '">';
+		}
+		$endlist = '</ol>';
+		
+		$block->content = Format::term_tree( $vocab->get_tree(), $vocab->name, array( $this, 'render_menu_item' ), $wrapper, $startlist, $endlist);
 	}
 
 	/**
