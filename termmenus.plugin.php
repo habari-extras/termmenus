@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * TermMenus
+ * 
+ * @todo add domain to all _t() calls
+ */
 class TermMenus extends Plugin
 {
 	public function  __get($name)
@@ -60,28 +64,6 @@ class TermMenus extends Plugin
 	}
 
 	/**
-	 * Create a vocabulary for any newly saved menu block
-	 **/
-	function action_block_insert_after($block)
-	{
-		// need to check if it's a menu block
-		if ( $block->type == 'menu' ) {
-			$vocab_name = 'menu_' . Utils::slugify( $block->title, '_' );
-
-			if( !Vocabulary::exists( $vocab_name ) ) {
-				$params = array(
-					'name' => $vocab_name,
-					'description' => _t( 'A vocabulary for the "%s" menu', array( $block->title ) ), // need termmenus domain on this _t
-					'features' => array( 'unique', 'hierarchical' ),
-				);
-
-				$menu_vocab = new Vocabulary( $params );
-				$menu_vocab->insert();
-			}
-		}
-	}
-
-	/**
 	 * Add to the list of possible block types.
 	 **/
 	public function filter_block_list($block_list)
@@ -95,18 +77,14 @@ class TermMenus extends Plugin
 	 **/
 	public function action_block_form_menu( $form, $block )
 	{
-		// This gets the right menu, but doesn't output a draggable menu editor
-		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
-		$form->append('select', 'menu', $block, _t( 'Menu Taxonomy' ), $vocab->get_options());
-
-		$form->append('submit', 'save', 'Save');
+		$form->append('select', 'menu_taxonomy', $block, _t( 'Menu Taxonomy' ), $this->get_menus(true));
 	}
 
 	/**
 	 * Populate the block with some content
 	 **/
 	public function action_block_content_menu( $block ) {
-		$vocab = Vocabulary::get( 'menu_' . Utils::slugify( $block->title, '_' ) );
+		$vocab = Vocabulary::get_by_id($block->menu_taxonomy);
 		$block->vocabulary = $vocab;
 		$block->content = Format::term_tree( $vocab->get_tree(), $vocab->name, array( $this, 'render_menu_item' ) );
 	}
@@ -116,20 +94,30 @@ class TermMenus extends Plugin
 	 **/
 	public function action_form_publish ( $form, $post )
 	{
-//		$blocks = DB::get_results('SELECT b.* FROM {blocks} b INNER JOIN {blocks_areas} ba ON ba.block_id = b.id WHERE b.type = "menu" ORDER BY ba.display_order ASC', array(), 'Block');
-		$blocks = DB::get_results('SELECT * FROM {blocks} WHERE type = "menu"', array(), 'Block');
-
-		$blocklist = array();
-		foreach($blocks as $block) {
-			$blocklist['menu_' . Utils::slugify($block->title, '_')] = $block->title;
+		$menus = $this->get_menus();
+	
+		$menulist = array();
+		foreach($menus as $menu) {
+			$menulist[$menu->id] = $menu->name;
 		}
 
 		$settings = $form->publish_controls->append('fieldset', 'menu_set', _t('Menus'));
-		$settings->append('checkboxes', 'menus', 'null:null', _t('Menus'), $blocklist);
+		$settings->append('checkboxes', 'menus', 'null:null', _t('Menus'), $menulist);
 
 		// If this is an existing post, see if it has categories already
 		if ( 0 != $post->id ) {
-//			$form->categories->value = implode( ', ', array_values( $this->get_categories( $post ) ) );
+			// Get the terms associated to this post
+			$object_terms = Vocabulary::get_all_object_terms('post', $post->id);
+			$menu_ids = array_keys($menulist);
+			$value = array();
+			// if the term is in a menu vocab, enable that checkbox
+			foreach($object_terms as $term) {
+				if(in_array($term->vocabulary_id, $menu_ids)) {
+					$value[] = $term->vocabulary_id;
+				}
+			}
+			
+			$form->menus->value = $value;
 		}
 	}
 
@@ -140,20 +128,22 @@ class TermMenus extends Plugin
 	public function action_publish_post( $post, $form )
 	{
 		$term_title = $post->title;
-		foreach($form->menus->value as $menu_vocab_name) {
-			$vocabulary = Vocabulary::get($menu_vocab_name);
-			$term = $vocabulary->get_object_terms('post', $post->id);
-// Utils::debug($post, $post->id); die();
-			if(!$term) {
-				$term = new Term(array(
-					'term_display' => $post->title,
-					'term' => $post->slug,
-				));
-				$vocabulary->add_term($term);
-				$vocabulary->set_object_terms('post', $post->id, array($term->term));
+		$selected_menus = $form->menus->value;
+		foreach($this->get_menus() as $menu) {
+			if(in_array($menu->id, $selected_menus)) {
+				$terms = $menu->get_object_terms('post', $post->id);
+				if(count($terms) == 0) {
+					$term = new Term(array(
+						'term_display' => $post->title,
+						'term' => $post->slug,
+					));
+					$menu->add_term($term);
+					$menu->set_object_terms('post', 
+						$post->id, 
+						array($term->term));
+				}
 			}
 		}
-		//Utils::debug($term); die();
 	}
 
 	/**
@@ -212,59 +202,113 @@ class TermMenus extends Plugin
 	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
 	{
 		$theme->page_content = '';
-		if( isset( $_GET[ 'action' ] ) ) {
-			switch( $_GET[ 'action' ] ) {
-				case 'edit': 
-					$vocabulary = Vocabulary::get( $_GET[ 'menu' ] );
-					if ( $vocabulary == false ) {
-						$theme->page_content = _t( '<h2>Invalid Menu.</h2>', 'termmenus' );
-						// that's it, we're done. Maybe we show the list of menus instead?
-						break;
-					}
-					$form = new FormUI( 'edit_menu' );
-
-					if ( !$vocabulary->is_empty() ) {
-						// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
-						$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
-//						$form->tree->value = $vocabulary->get_root_terms();
-						// append other needed controls, if there are any.
-					}
-					else {
-						$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
-						// add another control here to add one by URL, maybe?
-					}
-					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
-					$theme->page_content = $form->get();
+		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
+		
+		switch( $action ) {
+			case 'edit': 
+				$vocabulary = Vocabulary::get( $_GET[ 'menu' ] );
+				if ( $vocabulary == false ) {
+					$theme->page_content = _t( '<h2>Invalid Menu.</h2>', 'termmenus' );
+					// that's it, we're done. Maybe we show the list of menus instead?
 					break;
+				}
+				$form = new FormUI( 'edit_menu' );
 
-				default:
-Utils::debug( $_GET ); die();
-			}
-		}
-		else { // no action - list the menus.
-			$menu_list = '';
-			// get an array of all the menu vocabularies
-			$vocabularies = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%" ORDER BY name ASC', array(), 'Vocabulary' );
-			foreach ( $vocabularies as $menu ) {
-				$menu_name = $menu->name;
-				$edit_link = URL::get( 'admin', array( 
-					'page' => 'menus',
-					'action' => 'edit',
-					'menu' => $menu_name, // already slugified
-				) );
-				$menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
-			}
-			if ( $menu_list != '' ) {
-				$theme->page_content = "<ul>$menu_list</ul>";
-			}
-			else {
-				$theme->page_content = _t( '<h2>No Menus have been created.</h2>', 'termmenus' );
-			}
+				if ( !$vocabulary->is_empty() ) {
+					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
+					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
+//						$form->tree->value = $vocabulary->get_root_terms();
+					// append other needed controls, if there are any.
+				}
+				else {
+					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
+					// add another control here to add one by URL, maybe?
+				}
+				$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
+				$theme->page_content = $form->get();
+				break;
+
+			case 'create':
+				
+				$form = new FormUI('create_menu');
+				$form->append('text', 'menuname', 'null:null', 'Menu Name')
+					->add_validator('validate_required', _t('You must supply a valid menu name'))
+					->add_validator(array($this, 'validate_newvocab'));
+				$form->append('submit', 'submit', _t('Create Menu'));
+				$form->on_success(array($this, 'add_menu_form_save'));
+				$theme->page_content = $form->get();
+				
+				break;
+				
+			case 'list':
+				$menu_list = '';
+
+				foreach ( $this->get_menus() as $menu ) {
+					$menu_name = $menu->name;
+					$edit_link = URL::get( 'admin', array( 
+						'page' => 'menus',
+						'action' => 'edit',
+						'menu' => $menu_name, // already slugified
+					) );
+					$menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+				}
+				if ( $menu_list != '' ) {
+					$theme->page_content = "<ul>$menu_list</ul>";
+				}
+				else {
+					$theme->page_content = _t( '<h2>No Menus have been created.</h2>', 'termmenus' );
+				}
+				break;
+				
+			default:
+Utils::debug( $_GET, $action ); die();
 		}
 
 		$theme->display( 'menus_admin' );
 		// End everything
 		exit;
+	}
+	
+	public function add_menu_form_save($form)
+	{
+		$params = array(
+			'name' => $form->menuname->value,
+			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ) ), 
+			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
+		);
+		$vocab = Vocabulary::create($params);
+		Session::notice(_t('Created menu "%s".', array($form->menuname->value)));
+		Utils::redirect(URL::get( 'admin', 'page=menus' ));
+	}
+	
+	public function validate_newvocab($value, $control, $form)
+	{
+		if(Vocabulary::get($value) instanceof Vocabulary) {
+			return array(_t('Please choose a vocabulary name that does not already exist.'));
+		}
+		return array();
+	}
+	
+	public function get_menus($as_array = false)
+	{
+		$vocabularies = Vocabulary::get_all();
+		$outarray = array();
+		foreach ( $vocabularies as $index => $menu ) {
+			if(!$menu->term_menu) { // check for the term_menu feature we added.
+				unset($vocabularies[$index]);
+			}
+			else {
+				if($as_array) {
+					$outarray[$menu->id] = $menu->name;
+				}
+			}
+		}
+		if($as_array) {
+			return $outarray;
+		}
+		else {
+			return $vocabularies;
+		}
 	}
 
 	/**
@@ -274,10 +318,20 @@ Utils::debug( $_GET ); die();
 	public function render_menu_item( $term, $wrapper )
 	{
 		$title = $term->term_display;
-		$post_ids = $term->objects('post');
-		$post = Post::get(array('id' =>reset($post_ids)));
-		$link = URL::get( 'display_post', array( 'slug' => $post->slug ) );
-		return "<a href='$link'>$title</a>";
+		$objects = $term->object_types();
+		foreach($objects as $object_id => $type) {
+			switch($type) {
+				case 'post':
+					$post = Post::get(array('id' =>$object_id));
+					if($post instanceof Post) {
+						$link = URL::get( 'display_post', array( 'slug' => $post->slug ) );
+					}
+					return "<a href=\"$link\">$title</a>";
+				case 'url':
+					$link = $term->info->url;
+					return "<a href=\"$link\">$title</a>";
+			}
+		}
 	}
 
 }
