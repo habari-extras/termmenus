@@ -85,7 +85,7 @@ class TermMenus extends Plugin
 	/**
 	 * Populate the block with some content
 	 **/
-	public function action_block_content_menu( $block ) {
+	public function action_block_content_menu( $block, $theme ) {
 		$vocab = Vocabulary::get_by_id($block->menu_taxonomy);
 		$block->vocabulary = $vocab;
 		if($block->div_wrap) {
@@ -94,15 +94,23 @@ class TermMenus extends Plugin
 		else {
 			$wrapper = '%s';
 		}
-		if($block->list_class == '') {
-			$startlist = '<ol class="tree">';
-		}
-		else {
-			$startlist = '<ol class="' . Utils::slugify($block->list_class) . '">';
-		}
-		$endlist = '</ol>';
 		
-		$block->content = Format::term_tree( $vocab->get_tree(), $vocab->name, array( $this, 'render_menu_item' ), $wrapper, $startlist, $endlist);
+		// preprocess some things
+		$tree = $vocab->get_tree();
+		
+		$block->content = Format::term_tree( 
+			$tree, //$vocab->get_tree(), 
+			$vocab->name, 
+			array(
+				//'linkcallback' => array($this, 'render_menu_link'),
+				'itemcallback' => array($this, 'render_menu_item'),
+				'linkwrapper' => $wrapper,
+				'treeattr' => array(
+					'class' => $block->list_class,
+				),
+				'theme' => $theme,
+			)
+		);
 	}
 
 	/**
@@ -328,26 +336,45 @@ Utils::debug( $_GET, $action ); die();
 	}
 
 	/**
-	 * Callback function for block output
-	 *
+	 * Callback function for block output of menu list item
 	 **/
-	public function render_menu_item( $term, $wrapper )
+	public function render_menu_item( $term, $config )
 	{
 		$title = $term->term_display;
+		$link = '';
 		$objects = $term->object_types();
+		$active = false;
 		foreach($objects as $object_id => $type) {
 			switch($type) {
 				case 'post':
 					$post = Post::get(array('id' =>$object_id));
 					if($post instanceof Post) {
-						$link = URL::get( 'display_post', array( 'slug' => $post->slug ) );
+						$link = $post->permalink;
+						if($config['theme']->posts instanceof Post && $config['theme']->posts->id == $post->id) {
+							$active = true;
+						}
 					}
-					return "<a href=\"$link\">$title</a>";
+					break;
 				case 'url':
 					$link = $term->info->url;
-					return "<a href=\"$link\">$title</a>";
+					break;
 			}
 		}
+		$title = $term->term_display;
+		if($link == '') {
+			$config['wrapper'] = sprintf($config['linkwrapper'], $title);
+		}
+		else {
+			$config['wrapper'] = sprintf($config['linkwrapper'], "<a href=\"{$link}\">{$title}</a>");
+		}
+		if($active) {
+			$config['itemattr']['class'] = 'active';
+		}
+		else {
+			$config['itemattr']['class'] = 'inactive';
+		}
+		
+		return $config;
 	}
 
 }
