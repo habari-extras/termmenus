@@ -283,7 +283,17 @@ class TermMenus extends Plugin
 					$theme->page_content = _t( '<h2>No Menus have been created.</h2>', 'termmenus' );
 				}
 				break;
-				
+
+			case 'delete_item':
+				$term = $this->get_term_by_id( $handler->handler_vars[ 'term' ] ); // Term::get_by_id will likely be static
+
+Utils::debug( "deleting $term... not really"); die();				
+
+				$term->delete();
+				// log that it has been deleted?
+				break;
+			
+			case 'edit_item':
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
@@ -334,7 +344,37 @@ Utils::debug( $_GET, $action ); die();
 			return $vocabularies;
 		}
 	}
+	/**
+	 *
+	 * Callback for Format::term_tree to use with $config['linkcallback']
+	 *
+	 * @param Term $term
+	 * @param array $config
+	 * @return array $config modified with the new wrapper div
+	 **/
+	public function tree_item_callback( Term $term, $config )
+	{
+		// coming into this, default $config['wrapper'] is "<div>%s</div>"
 
+		// make the links
+		$edit_link = URL::get( 'admin', array( 
+						'page' => 'menus',
+						'action' => 'edit_term',
+						'term' => $term->id,
+					) );
+		$delete_link = URL::get( 'admin', array( 
+						'page' => 'menus',
+						'action' => 'delete_term',
+						'term' => $term->id,
+					) );
+
+		// insert them into the wrapper
+		$links = "<a class='menu_item_edit' href='$edit_link'>edit</a> <a class='menu_item_delete' href='$delete_link'>delete</a>";
+		$config[ 'wrapper' ] = "<div>%s $links</div>";
+
+		return $config;
+	}
+	
 	/**
 	 * Callback function for block output of menu list item
 	 **/
@@ -377,6 +417,18 @@ Utils::debug( $_GET, $action ); die();
 		return $config;
 	}
 
+	/**
+	 * Return a Term by id
+	 *
+	 * @param integer $id The id of the term
+	 * @return Term The object requested
+	 */
+//	public static function get_by_id( $id )
+	public function get_term_by_id( $id )
+	{
+		return DB::get_row( 'SELECT * FROM {terms} WHERE id=?', array( $id ), 'Term' );
+	}
+	
 }
 
 ?>
