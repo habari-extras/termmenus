@@ -94,13 +94,13 @@ class TermMenus extends Plugin
 		else {
 			$wrapper = '%s';
 		}
-		
+
 		// preprocess some things
 		$tree = $vocab->get_tree();
-		
-		$block->content = Format::term_tree( 
-			$tree, //$vocab->get_tree(), 
-			$vocab->name, 
+
+		$block->content = Format::term_tree(
+			$tree, //$vocab->get_tree(),
+			$vocab->name,
 			array(
 				//'linkcallback' => array($this, 'render_menu_link'),
 				'itemcallback' => array($this, 'render_menu_item'),
@@ -119,7 +119,7 @@ class TermMenus extends Plugin
 	public function action_form_publish ( $form, $post )
 	{
 		$menus = $this->get_menus();
-	
+
 		$menulist = array();
 		foreach($menus as $menu) {
 			$menulist[$menu->id] = $menu->name;
@@ -140,7 +140,7 @@ class TermMenus extends Plugin
 					$value[] = $term->vocabulary_id;
 				}
 			}
-			
+
 			$form->menus->value = $value;
 		}
 	}
@@ -162,8 +162,8 @@ class TermMenus extends Plugin
 						'term' => $post->slug,
 					));
 					$menu->add_term($term);
-					$menu->set_object_terms('post', 
-						$post->id, 
+					$menu->set_object_terms('post',
+						$post->id,
 						array($term->term));
 				}
 			}
@@ -178,14 +178,14 @@ class TermMenus extends Plugin
 		// obtain existing last submenu item
 		$last_used = end( $menu[ 'create' ][ 'submenu' ]);
 		// add a menu item at the bottom
-		$menu[ 'create' ][ 'submenu' ][] = array( 
+		$menu[ 'create' ][ 'submenu' ][] = array(
 			'title' => _t( 'Create a new Menu', 'termmenus' ),
 			'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ),
 			'text' => _t( 'Menu', 'termmenus' ),
 			'hotkey' => $last_used[ 'hotkey' ] + 1, // next available hotkey is last used + 1
 		);
 		$last_used = end( $menu[ 'manage' ][ 'submenu' ]);
-		$menu[ 'manage' ][ 'submenu' ][] = array( 
+		$menu[ 'manage' ][ 'submenu' ][] = array(
 			'title' => _t( 'Manage Menus', 'termmenus' ),
 			'url' => URL::get( 'admin', 'page=menus' ), // might as well make listing the existing menus the default
 			'text' => _t( 'Menus', 'termmenus' ),
@@ -218,7 +218,7 @@ class TermMenus extends Plugin
 		}
 		return $require_any;
 	}
-	
+
 	/**
 	 * Prepare and display admin page
 	 *
@@ -227,9 +227,9 @@ class TermMenus extends Plugin
 	{
 		$theme->page_content = '';
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
-		
+
 		switch( $action ) {
-			case 'edit': 
+			case 'edit':
 				$vocabulary = Vocabulary::get( $_GET[ 'menu' ] );
 				if ( $vocabulary == false ) {
 					$theme->page_content = _t( '<h2>Invalid Menu.</h2>', 'termmenus' );
@@ -243,17 +243,18 @@ class TermMenus extends Plugin
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
 //						$form->tree->value = $vocabulary->get_root_terms();
 					// append other needed controls, if there are any.
+
+					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 				}
 				else {
 					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
 					// add another control here to add one by URL, maybe?
 				}
-				$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 				$theme->page_content = $form->get();
 				break;
 
 			case 'create':
-				
+
 				$form = new FormUI('create_menu');
 				$form->append('text', 'menuname', 'null:null', 'Menu Name')
 					->add_validator('validate_required', _t('You must supply a valid menu name'))
@@ -261,15 +262,15 @@ class TermMenus extends Plugin
 				$form->append('submit', 'submit', _t('Create Menu'));
 				$form->on_success(array($this, 'add_menu_form_save'));
 				$theme->page_content = $form->get();
-				
+
 				break;
-				
+
 			case 'list':
 				$menu_list = '';
 
 				foreach ( $this->get_menus() as $menu ) {
 					$menu_name = $menu->name;
-					$edit_link = URL::get( 'admin', array( 
+					$edit_link = URL::get( 'admin', array(
 						'page' => 'menus',
 						'action' => 'edit',
 						'menu' => $menu_name, // already slugified
@@ -286,14 +287,14 @@ class TermMenus extends Plugin
 
 			case 'delete_item':
 				$term = $this->get_term_by_id( $handler->handler_vars[ 'term' ] ); // Term::get_by_id will likely be static
-
-Utils::debug( "deleting $term... not really"); die();				
+Utils::debug( "deleting $term... not really"); die();
 
 				$term->delete();
 				// log that it has been deleted?
 				break;
-			
+
 			case 'edit_item':
+			case 'create_link':
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
@@ -302,7 +303,7 @@ Utils::debug( $_GET, $action ); die();
 		// End everything
 		exit;
 	}
-	
+
 	public function add_menu_form_save($form)
 	{
 		$params = array(
@@ -314,7 +315,7 @@ Utils::debug( $_GET, $action ); die();
 		Session::notice(_t('Created menu "%s".', array($form->menuname->value)));
 		Utils::redirect(URL::get( 'admin', 'page=menus' ));
 	}
-	
+
 	public function validate_newvocab($value, $control, $form)
 	{
 		if(Vocabulary::get($value) instanceof Vocabulary) {
@@ -322,7 +323,7 @@ Utils::debug( $_GET, $action ); die();
 		}
 		return array();
 	}
-	
+
 	public function get_menus($as_array = false)
 	{
 		$vocabularies = Vocabulary::get_all();
@@ -344,6 +345,7 @@ Utils::debug( $_GET, $action ); die();
 			return $vocabularies;
 		}
 	}
+
 	/**
 	 *
 	 * Callback for Format::term_tree to use with $config['linkcallback']
@@ -357,12 +359,12 @@ Utils::debug( $_GET, $action ); die();
 		// coming into this, default $config['wrapper'] is "<div>%s</div>"
 
 		// make the links
-		$edit_link = URL::get( 'admin', array( 
+		$edit_link = URL::get( 'admin', array(
 						'page' => 'menus',
 						'action' => 'edit_term',
 						'term' => $term->id,
 					) );
-		$delete_link = URL::get( 'admin', array( 
+		$delete_link = URL::get( 'admin', array(
 						'page' => 'menus',
 						'action' => 'delete_term',
 						'term' => $term->id,
@@ -374,7 +376,7 @@ Utils::debug( $_GET, $action ); die();
 
 		return $config;
 	}
-	
+
 	/**
 	 * Callback function for block output of menu list item
 	 **/
@@ -413,7 +415,7 @@ Utils::debug( $_GET, $action ); die();
 		else {
 			$config['itemattr']['class'] = 'inactive';
 		}
-		
+
 		return $config;
 	}
 
@@ -428,7 +430,7 @@ Utils::debug( $_GET, $action ); die();
 	{
 		return DB::get_row( 'SELECT * FROM {terms} WHERE id=?', array( $id ), 'Term' );
 	}
-	
+
 }
 
 ?>
