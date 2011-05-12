@@ -227,10 +227,9 @@ class TermMenus extends Plugin
 	{
 		$theme->page_content = '';
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
-
 		switch( $action ) {
 			case 'edit':
-				$vocabulary = Vocabulary::get( $_GET[ 'menu' ] );
+				$vocabulary = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
 				if ( $vocabulary == false ) {
 					$theme->page_content = _t( '<h2>Invalid Menu.</h2>', 'termmenus' );
 					// that's it, we're done. Maybe we show the list of menus instead?
@@ -276,11 +275,10 @@ class TermMenus extends Plugin
 				$menu_list = '';
 
 				foreach ( $this->get_menus() as $menu ) {
-					$menu_name = $menu->name;
 					$edit_link = URL::get( 'admin', array(
 						'page' => 'menus',
 						'action' => 'edit',
-						'menu' => $menu_name, // already slugified
+						'menu' => $menu->id,
 					) );
 					$menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
 				}
@@ -292,15 +290,17 @@ class TermMenus extends Plugin
 				}
 				break;
 
-			case 'delete_item':
-				$term = $this->get_term_by_id( $handler->handler_vars[ 'term' ] ); // Term::get_by_id will likely be static
-Utils::debug( "deleting $term... not really"); die();
-
+			case 'delete_term':
+				$term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
+				$menu_vocab = $term->vocabulary_id;
+Utils::debug( $menu_vocab ); die();
 				$term->delete();
 				// log that it has been deleted?
+				Session::notice(_t('Created menu "%s".', array($form->menuname->value)));
+				Utils::redirect(URL::get( 'admin', 'page=menus' ));				
 				break;
 
-			case 'edit_item':
+			case 'edit_term':
 				break;
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
