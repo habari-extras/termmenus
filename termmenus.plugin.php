@@ -241,6 +241,7 @@ class TermMenus extends Plugin
 				if ( !$vocabulary->is_empty() ) {
 					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
+					$form->tree->config = array( 'linkcallback' => array( $this, 'tree_item_callback' ) );
 //						$form->tree->value = $vocabulary->get_root_terms();
 					// append other needed controls, if there are any.
 
@@ -444,18 +445,6 @@ Utils::debug( $_GET, $action ); die();
 		}
 
 		return $config;
-	}
-
-	/**
-	 * Return a Term by id
-	 *
-	 * @param integer $id The id of the term
-	 * @return Term The object requested
-	 */
-//	public static function get_by_id( $id )
-	public function get_term_by_id( $id )
-	{
-		return DB::get_row( 'SELECT * FROM {terms} WHERE id=?', array( $id ), 'Term' );
 	}
 
 }
