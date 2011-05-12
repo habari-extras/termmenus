@@ -249,6 +249,12 @@ class TermMenus extends Plugin
 				else {
 					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
 					// add another control here to add one by URL, maybe?
+					$form->append( 'static', 'create link link',
+						'<a href="' . URL::get('admin', array(
+							'page' => 'menus',
+							'action' => 'create_link',
+							'menu_id' => $vocabulary->id,
+						) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
 				}
 				$theme->page_content = $form->get();
 				break;
@@ -256,11 +262,11 @@ class TermMenus extends Plugin
 			case 'create':
 
 				$form = new FormUI('create_menu');
-				$form->append('text', 'menuname', 'null:null', 'Menu Name')
-					->add_validator('validate_required', _t('You must supply a valid menu name'))
-					->add_validator(array($this, 'validate_newvocab'));
-				$form->append('submit', 'submit', _t('Create Menu'));
-				$form->on_success(array($this, 'add_menu_form_save'));
+				$form->append('text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
+					->add_validator('validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
+					->add_validator(array($this, 'validate_newvocab') );
+				$form->append('submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
+				$form->on_success(array($this, 'add_menu_form_save') );
 				$theme->page_content = $form->get();
 
 				break;
@@ -294,7 +300,20 @@ Utils::debug( "deleting $term... not really"); die();
 				break;
 
 			case 'edit_item':
+				break;
 			case 'create_link':
+				$form = new FormUI( 'create_link' );
+				$form->append( 'text', 'link_name', 'null:null', _t( 'Link title', 'termmenus' ) )
+					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
+				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
+					->add_validator( 'validate_required', _t( 'URL is required.', 'termmenus' ) )
+					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
+				$form->append( );
+				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
+
+				$form->on_success( array( $this, 'create_link_form_save' ) );
+				$theme->page_content = $form->get();
+				break;
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
@@ -304,16 +323,24 @@ Utils::debug( $_GET, $action ); die();
 		exit;
 	}
 
-	public function add_menu_form_save($form)
+	public function add_menu_form_save( $form )
 	{
 		$params = array(
 			'name' => $form->menuname->value,
-			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ) ), 
+			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ) ),
 			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
 		$vocab = Vocabulary::create($params);
-		Session::notice(_t('Created menu "%s".', array($form->menuname->value)));
-		Utils::redirect(URL::get( 'admin', 'page=menus' ));
+		Session::notice( _t( 'Created menu "%s".', array( $form->menuname->value ), 'termmenus' ) );
+		Utils::redirect( URL::get( 'admin', 'page=menus' ));
+	}
+
+	public function create_link_form_save( $form )
+	{
+		// create a term for the link, store the URL
+
+		Session::notice( _t( 'Link added.', 'termmenus' ) );
+		Utils::redirect(URL::get( 'admin', 'page=menus' ) );
 	}
 
 	public function validate_newvocab($value, $control, $form)
