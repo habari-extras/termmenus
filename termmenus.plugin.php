@@ -241,7 +241,7 @@ class TermMenus extends Plugin
 				if ( !$vocabulary->is_empty() ) {
 					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
-					$form->tree->config = array( 'linkcallback' => array( $this, 'tree_item_callback' ) );
+					$form->tree->config = array( 'itemcallback' => array( $this, 'tree_item_callback' ) );
 //						$form->tree->value = $vocabulary->get_root_terms();
 					// append other needed controls, if there are any.
 
