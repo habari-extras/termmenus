@@ -253,7 +253,7 @@ class TermMenus extends Plugin
 						'<a href="' . URL::get('admin', array(
 							'page' => 'menus',
 							'action' => 'create_link',
-							'menu_id' => $vocabulary->id,
+							'menu' => $vocabulary->id,
 						) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
 				}
 				$theme->page_content = $form->get();
@@ -293,11 +293,10 @@ class TermMenus extends Plugin
 			case 'delete_term':
 				$term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
 				$menu_vocab = $term->vocabulary_id;
-Utils::debug( $menu_vocab ); die();
 				$term->delete();
 				// log that it has been deleted?
-				Session::notice(_t('Created menu "%s".', array($form->menuname->value)));
-				Utils::redirect(URL::get( 'admin', 'page=menus' ));				
+				Session::notice( _t( 'Item deleted.', 'termmenus' ) );
+				Utils::redirect( URL::get( 'admin', array( 'page' => 'menus', 'action' => 'edit', 'menu' => $menu_vocab ) ) );
 				break;
 
 			case 'edit_term':
@@ -309,7 +308,7 @@ Utils::debug( $menu_vocab ); die();
 				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'URL is required.', 'termmenus' ) )
 					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
-				$form->append( );
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'create_link_form_save' ) );
