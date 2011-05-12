@@ -77,9 +77,9 @@ class TermMenus extends Plugin
 	 **/
 	public function action_block_form_menu( $form, $block )
 	{
-		$form->append('select', 'menu_taxonomy', $block, _t( 'Menu Taxonomy' ), $this->get_menus(true));
-		$form->append('checkbox', 'div_wrap', $block, _t( 'Wrap each menu link in a div' ));
-		$form->append('text', 'list_class', $block, _t( 'Custom class for the tree ordered list element' ));
+		$form->append('select', 'menu_taxonomy', $block, _t( 'Menu Taxonomy', 'termmenus' ), $this->get_menus( true ) );
+		$form->append('checkbox', 'div_wrap', $block, _t( 'Wrap each menu link in a div', 'termmenus' ) );
+		$form->append('text', 'list_class', $block, _t( 'Custom class for the tree ordered list element', 'termmenus' ) );
 	}
 
 	/**
@@ -337,16 +337,29 @@ Utils::debug( $_GET, $action ); die();
 
 	public function create_link_form_save( $form )
 	{
+		$menu_vocab = intval( $form->menu->value );
 		// create a term for the link, store the URL
-
+		$vocabulary = Vocabulary::get_by_id( $menu_vocab );
+/* Code taken from creating a post term up above. Need to change it for a URL.
+		$term = new Term( array(
+			'term_display' => $post->title,
+			'term' => $post->slug,
+			));
+			$menu->add_term( $term );
+			$menu->set_object_terms( 'url',	$post->id, array( $term->term ) );	
+*/		
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
-		Utils::redirect(URL::get( 'admin', 'page=menus' ) );
+		Utils::redirect(URL::get( 'admin', array( 
+			'page' => 'menus',
+			'action' => 'edit',
+			'menu' => $menu_vocab,
+			) ) );
 	}
 
-	public function validate_newvocab($value, $control, $form)
+	public function validate_newvocab( $value, $control, $form )
 	{
-		if(Vocabulary::get($value) instanceof Vocabulary) {
-			return array(_t('Please choose a vocabulary name that does not already exist.'));
+		if(Vocabulary::get( $value ) instanceof Vocabulary) {
+			return array( _t( 'Please choose a vocabulary name that does not already exist.', 'termmenus' ) );
 		}
 		return array();
 	}
