@@ -22,12 +22,13 @@ class TermMenus extends Plugin
 	 **/
 	public function action_plugin_activation($file)
 	{
-		if ( Plugins::id_from_file($file) == Plugins::id_from_file(__FILE__) ) {
-			// create default access token
-			ACL::create_token( 'manage_menus', _t('Manage menus'), 'Administration', false );
-			$group = UserGroup::get_by_name( 'admin' );
-			$group->grant( 'manage_menus' );
-		}
+		// create default access token
+		ACL::create_token( 'manage_menus', _t('Manage menus'), 'Administration', false );
+		$group = UserGroup::get_by_name( 'admin' );
+		$group->grant( 'manage_menus' );
+
+		// register URL type
+		Vocabulary::add_object_type( 'url' );
 	}
 
 	/**
@@ -345,6 +346,7 @@ Utils::debug( $_GET, $action ); die();
 			));
 		$term->info->url = $form->link_url->value;
 		$menu->add_term( $term );
+		$term->associate( 'url', 0 );
 
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
