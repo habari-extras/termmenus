@@ -43,24 +43,22 @@ class TermMenus extends Plugin
 	/**
 	 * Remove the admin token
 	 **/
-	public function action_plugin_deactivation($file)
+	public function action_plugin_deactivation( $file )
 	{
-		if ( Plugins::id_from_file($file) == Plugins::id_from_file(__FILE__) ) {
-			// delete default access token
-			ACL::destroy_token( 'manage_menus' );
+		// delete default access token
+		ACL::destroy_token( 'manage_menus' );
 
-			// delete menu vocabularies that were created
-			$vocabs = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%"', array(), 'Vocabulary' );
-			foreach( $vocabs as $vocab ) {
-				// This should only delete the ones that are menu vocabularies, unless others have been named 'menu_xxxxx'
-				$vocab->delete();
-			}
+		// delete menu vocabularies that were created
+		$vocabs = DB::get_results( 'SELECT * FROM {vocabularies} WHERE name LIKE "menu_%"', array(), 'Vocabulary' );
+		foreach( $vocabs as $vocab ) {
+			// This should only delete the ones that are menu vocabularies, unless others have been named 'menu_xxxxx'
+			$vocab->delete();
+		}
 
-			// delete blocks that were created
-			$blocks = DB::get_results( 'SELECT * FROM {blocks} WHERE type = "menu"', array(), 'Block') ;
-			foreach( $blocks as $block ) {
-				$block->delete();
-			}
+		// delete blocks that were created
+		$blocks = DB::get_results( 'SELECT * FROM {blocks} WHERE type = "menu"', array(), 'Block') ;
+		foreach( $blocks as $block ) {
+			$block->delete();
 		}
 	}
 
