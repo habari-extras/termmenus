@@ -248,15 +248,13 @@ class TermMenus extends Plugin
 				}
 				else {
 					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
-					// add another control here to add one by URL, maybe?
-					$form->append( 'static', 'create link link',
-						'<a href="' . URL::get('admin', array(
-							'page' => 'menus',
-							'action' => 'create_link',
-							'menu' => $vocabulary->id,
-						) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
 				}
-				$theme->page_content = $form->get();
+				$form->append( 'static', 'create link link',
+					'<a href="' . URL::get('admin', array(
+						'page' => 'menus',
+						'action' => 'create_link',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );				$theme->page_content = $form->get();
 				break;
 
 			case 'create':
