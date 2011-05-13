@@ -6,6 +6,11 @@
  */
 class TermMenus extends Plugin
 {
+	// define values to be stored as $object_id in Terms of type 'menu'
+	protected $item_type = array( 
+		'url' => 0,
+			);
+	
 	public function  __get($name)
 	{
 		switch ( $name ) {
@@ -27,8 +32,8 @@ class TermMenus extends Plugin
 		$group = UserGroup::get_by_name( 'admin' );
 		$group->grant( 'manage_menus' );
 
-		// register URL type
-		Vocabulary::add_object_type( 'url' );
+		// register a menu type
+		Vocabulary::add_object_type( 'menu' );
 	}
 
 	/**
@@ -344,7 +349,7 @@ Utils::debug( $_GET, $action ); die();
 			));
 		$term->info->url = $form->link_url->value;
 		$menu->add_term( $term );
-		$term->associate( 'url', 0 );
+		$term->associate( 'menu', $item_type[ 'url' ] );
 
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
@@ -435,8 +440,12 @@ Utils::debug( $_GET, $action ); die();
 						}
 					}
 					break;
-				case 'url':
-					$link = $term->info->url;
+				case 'menu':
+					switch( $object_id ) {
+						case $item_type[ 'url' ]:
+							$link = $term->info->url;
+							break;
+					}
 					break;
 			}
 		}
