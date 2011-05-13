@@ -280,7 +280,8 @@ class TermMenus extends Plugin
 						'action' => 'edit',
 						'menu' => $menu->id,
 					) );
-					$menu_list .= "<li><a href='$edit_link' title='Modify $menu_name'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+					$menu_name = $menu->name;
+					$menu_list .= "<li><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
 				}
 				if ( $menu_list != '' ) {
 					$theme->page_content = "<ul>$menu_list</ul>";
@@ -339,17 +340,16 @@ Utils::debug( $_GET, $action ); die();
 	{
 		$menu_vocab = intval( $form->menu->value );
 		// create a term for the link, store the URL
-		$vocabulary = Vocabulary::get_by_id( $menu_vocab );
-/* Code taken from creating a post term up above. Need to change it for a URL.
+		$menu = Vocabulary::get_by_id( $menu_vocab );
 		$term = new Term( array(
-			'term_display' => $post->title,
-			'term' => $post->slug,
+			'term_display' => $form->link_name->value,
+			'term' => Utils::slugify( $form->link_name->value ),
 			));
-			$menu->add_term( $term );
-			$menu->set_object_terms( 'url',	$post->id, array( $term->term ) );	
-*/		
+		$term->info->url = $form->link_url->value;
+		$menu->add_term( $term );
+
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
-		Utils::redirect(URL::get( 'admin', array( 
+		Utils::redirect(URL::get( 'admin', array(
 			'page' => 'menus',
 			'action' => 'edit',
 			'menu' => $menu_vocab,
