@@ -1,16 +1,16 @@
 <?php
 /**
  * TermMenus
- * 
+ *
  * @todo add domain to all _t() calls
  */
 class TermMenus extends Plugin
 {
 	// define values to be stored as $object_id in Terms of type 'menu'
-	protected $item_type = array( 
+	private $item_type = array(
 		'url' => 0,
 			);
-	
+
 	public function  __get($name)
 	{
 		switch ( $name ) {
@@ -349,7 +349,7 @@ Utils::debug( $_GET, $action ); die();
 			));
 		$term->info->url = $form->link_url->value;
 		$menu->add_term( $term );
-		$term->associate( 'menu', $item_type[ 'url' ] );
+		$term->associate( 'menu', $this->item_type[ 'url' ] );
 
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
@@ -428,6 +428,7 @@ Utils::debug( $_GET, $action ); die();
 		$title = $term->term_display;
 		$link = '';
 		$objects = $term->object_types();
+
 		$active = false;
 		foreach($objects as $object_id => $type) {
 			switch($type) {
@@ -442,7 +443,7 @@ Utils::debug( $_GET, $action ); die();
 					break;
 				case 'menu':
 					switch( $object_id ) {
-						case $item_type[ 'url' ]:
+						case $this->item_type[ 'url' ]:
 							$link = $term->info->url;
 							break;
 					}
