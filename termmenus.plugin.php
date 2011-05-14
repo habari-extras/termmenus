@@ -8,9 +8,9 @@
 class TermMenus extends Plugin
 {
 	// define values to be stored as $object_id in Terms of type 'menu'
-	private $item_type = array(
+	private $item_types = array(
 		'url' => 0,
-			);
+	);
 
 	public function  __get($name)
 	{
@@ -351,7 +351,7 @@ Utils::debug( $_GET, $action ); die();
 			));
 		$term->info->url = $form->link_url->value;
 		$menu->add_term( $term );
-		$term->associate( 'menu', $this->item_type[ 'url' ] );
+		$term->associate( 'menu', $this->item_types[ 'url' ] );
 
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
@@ -390,6 +390,15 @@ Utils::debug( $_GET, $action ); die();
 			return $vocabularies;
 		}
 	}
+	
+	/**
+	* Provide a method for listing the types of menu items that are available
+	* @return array List of item types, keyed by name and having integer index values
+	**/
+	public function get_item_types()
+	{
+		return Plugins::filter('get_item_types', $this->item_types);
+	}
 
 	/**
 	 *
@@ -425,7 +434,7 @@ Utils::debug( $_GET, $action ); die();
 	/**
 	 * Callback function for block output of menu list item
 	 **/
-	public function render_menu_item( $term, $config )
+	public function render_menu_item( Term $term, $config )
 	{
 		$title = $term->term_display;
 		$link = '';
@@ -442,18 +451,26 @@ Utils::debug( $_GET, $action ); die();
 							$active = true;
 						}
 					}
+					else {
+						// The post doesn't exist or the user does not have access to it
+					}
 					break;
 				case 'menu':
+					$time_types = $this->get_item_types();
 					switch( $object_id ) {
-						case $this->item_type[ 'url' ]:
+						case $item_types[ 'url' ]:
 							$link = $term->info->url;
+							break;
+						default:
+							$link = null;
+							$link = Plugins::filter('get_item_link', $link, $term, $object_id, $type);
 							break;
 					}
 					break;
 			}
 		}
 		$title = $term->term_display;
-		if($link == '') {
+		if(empty($link)) {
 			$config['wrapper'] = sprintf($config['linkwrapper'], $title);
 		}
 		else {
