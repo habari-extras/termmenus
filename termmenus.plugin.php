@@ -3,6 +3,7 @@
  * TermMenus
  *
  * @todo add domain to all _t() calls
+ * @todo style everything so it looks good
  */
 class TermMenus extends Plugin
 {
@@ -239,10 +240,10 @@ class TermMenus extends Plugin
 					// that's it, we're done. Maybe we show the list of menus instead?
 					break;
 				}
+				$theme->page_content = _t( "<h4>Editing <b>{$vocabulary->name}</b></h4>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
 
 				if ( !$vocabulary->is_empty() ) {
-					// This doesn't work. Change it to something that does (or is it because there aren't any links in the menu I'm testing?)
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
 					$form->tree->config = array( 'itemcallback' => array( $this, 'tree_item_callback' ) );
 //						$form->tree->value = $vocabulary->get_root_terms();
@@ -258,7 +259,8 @@ class TermMenus extends Plugin
 						'page' => 'menus',
 						'action' => 'create_link',
 						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );				$theme->page_content = $form->get();
+					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
+				$theme->page_content .= $form->get();
 				break;
 
 			case 'create':
