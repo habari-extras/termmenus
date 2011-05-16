@@ -1,0 +1,6 @@
+.menu_item_delete {
+	background: url("../../../system/admin/images/closebutton.png") no-repeat scroll center center transparent;
+	float: right;
+	text-indent: -9999px;
+	width: 20px;
+}

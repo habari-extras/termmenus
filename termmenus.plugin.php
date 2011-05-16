@@ -490,7 +490,7 @@ Utils::debug( $form );
 
 		// insert them into the wrapper
 		// @TODO _t() this line or replace it altogether.
-		$links = "<a class='menu_item_edit' href='$edit_link'>edit</a> <a class='menu_item_delete' href='$delete_link'>delete</a>";
+		$links = "<a class='menu_item_edit' href='$edit_link'>edit</a> <a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a>";
 		$config[ 'wrapper' ] = "<div>%s $links</div>";
 
 		return $config;
@@ -554,6 +554,13 @@ Utils::debug( $form );
 		return $config;
 	}
 
+	public function action_admin_header( $theme )
+	{
+		// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
+		if ( $theme->page == 'menus' ) {
+			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ) );
+		}
+	}
 }
 
 ?>
