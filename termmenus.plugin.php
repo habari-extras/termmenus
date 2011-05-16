@@ -10,6 +10,7 @@ class TermMenus extends Plugin
 	// define values to be stored as $object_id in Terms of type 'menu'
 	private $item_types = array(
 		'url' => 0,
+		'spacer' => 1,	// a spacer is an item that goes nowhere.
 	);
 
 	public function  __get($name)
@@ -29,7 +30,7 @@ class TermMenus extends Plugin
 	public function action_plugin_activation($file)
 	{
 		// create default access token
-		ACL::create_token( 'manage_menus', _t('Manage menus'), 'Administration', false );
+		ACL::create_token( 'manage_menus', _t( 'Manage menus', 'termmenus' ), 'Administration', false );
 		$group = UserGroup::get_by_name( 'admin' );
 		$group->grant( 'manage_menus' );
 
@@ -260,6 +261,12 @@ class TermMenus extends Plugin
 						'action' => 'create_link',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
+				$form->append( 'static', 'create spacer link',
+					'<a href="' . URL::get('admin', array(
+						'page' => 'menus',
+						'action' => 'create_spacer',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a>' );
 				$theme->page_content .= $form->get();
 				break;
 
@@ -342,6 +349,16 @@ class TermMenus extends Plugin
 				$form->on_success( array( $this, 'create_link_form_save' ) );
 				$theme->page_content = $form->get();
 				break;
+
+			case 'create_spacer':
+				$form = new FormUI( 'create_spacer' );
+				$form->append( 'text', 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
+
+				$form->on_success( array( $this, 'create_spacer_form_save' ) );
+				$theme->page_content = $form->get();
+				break;			
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
@@ -388,7 +405,26 @@ Utils::debug( $form );
 			'menu' => $menu_vocab,
 			) ) );
 	}
+	
+	public function create_spacer_form_save( $form )
+	{
+		$menu_vocab = intval( $form->menu->value );
+		$menu = Vocabulary::get_by_id( $menu_vocab );
+		$term = new Term( array(
+			'term_display' => $form->spacer_text->value,
+			'term' => Utils::slugify( $form->spacer_text->value ),
+			));
+		$menu->add_term( $term );
+		$term->associate( 'menu', $this->item_types[ 'spacer' ] );
 
+		Session::notice( _t( 'Spacer added.', 'termmenus' ) );
+		Utils::redirect(URL::get( 'admin', array(
+			'page' => 'menus',
+			'action' => 'edit',
+			'menu' => $menu_vocab,
+			) ) );
+	}
+	
 	public function validate_newvocab( $value, $control, $form )
 	{
 		if(Vocabulary::get( $value ) instanceof Vocabulary) {
