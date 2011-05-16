@@ -130,18 +130,18 @@ class TermMenus extends Plugin
 			$menulist[$menu->id] = $menu->name;
 		}
 
-		$settings = $form->publish_controls->append('fieldset', 'menu_set', _t('Menus'));
-		$settings->append('checkboxes', 'menus', 'null:null', _t('Menus'), $menulist);
+		$settings = $form->publish_controls->append( 'fieldset', 'menu_set', _t( 'Menus', 'termmenus' ) );
+		$settings->append( 'checkboxes', 'menus', 'null:null', _t( 'Menus', 'termmenus' ), $menulist );
 
 		// If this is an existing post, see if it has categories already
 		if ( 0 != $post->id ) {
 			// Get the terms associated to this post
-			$object_terms = Vocabulary::get_all_object_terms('post', $post->id);
-			$menu_ids = array_keys($menulist);
+			$object_terms = Vocabulary::get_all_object_terms( 'post', $post->id );
+			$menu_ids = array_keys( $menulist );
 			$value = array();
 			// if the term is in a menu vocab, enable that checkbox
-			foreach($object_terms as $term) {
-				if(in_array($term->vocabulary_id, $menu_ids)) {
+			foreach( $object_terms as $term ) {
+				if( in_array( $term->vocabulary_id, $menu_ids ) ) {
 					$value[] = $term->vocabulary_id;
 				}
 			}
@@ -158,18 +158,18 @@ class TermMenus extends Plugin
 	{
 		$term_title = $post->title;
 		$selected_menus = $form->menus->value;
-		foreach($this->get_menus() as $menu) {
-			if(in_array($menu->id, $selected_menus)) {
-				$terms = $menu->get_object_terms('post', $post->id);
-				if(count($terms) == 0) {
+		foreach( $this->get_menus() as $menu ) {
+			if(in_array( $menu->id, $selected_menus ) ) {
+				$terms = $menu->get_object_terms( 'post', $post->id );
+				if( count( $terms ) == 0 ) {
 					$term = new Term(array(
 						'term_display' => $post->title,
 						'term' => $post->slug,
 					));
-					$menu->add_term($term);
-					$menu->set_object_terms('post',
+					$menu->add_term( $term );
+					$menu->set_object_terms( 'post',
 						$post->id,
-						array($term->term));
+						array( $term->term ) );
 				}
 			}
 		}
@@ -285,6 +285,7 @@ class TermMenus extends Plugin
 						'menu' => $menu->id,
 					) );
 					$menu_name = $menu->name;
+					// @TODO _t() this line or replace it altogether
 					$menu_list .= "<li><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
 				}
 				if ( $menu_list != '' ) {
@@ -354,7 +355,7 @@ Utils::debug( $_GET, $action ); die();
 	{
 		$params = array(
 			'name' => $form->menuname->value,
-			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ) ),
+			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ),
 			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
 		$vocab = Vocabulary::create($params);
@@ -401,16 +402,16 @@ Utils::debug( $form );
 		$vocabularies = Vocabulary::get_all();
 		$outarray = array();
 		foreach ( $vocabularies as $index => $menu ) {
-			if(!$menu->term_menu) { // check for the term_menu feature we added.
-				unset($vocabularies[$index]);
+			if( !$menu->term_menu ) { // check for the term_menu feature we added.
+				unset( $vocabularies[ $index ] );
 			}
 			else {
-				if($as_array) {
-					$outarray[$menu->id] = $menu->name;
+				if( $as_array ) {
+					$outarray[ $menu->id ] = $menu->name;
 				}
 			}
 		}
-		if($as_array) {
+		if( $as_array ) {
 			return $outarray;
 		}
 		else {
@@ -424,7 +425,7 @@ Utils::debug( $form );
 	**/
 	public function get_item_types()
 	{
-		return Plugins::filter('get_item_types', $this->item_types);
+		return Plugins::filter( 'get_item_types', $this->item_types );
 	}
 
 	/**
@@ -452,6 +453,7 @@ Utils::debug( $form );
 					) );
 
 		// insert them into the wrapper
+		// @TODO _t() this line or replace it altogether.
 		$links = "<a class='menu_item_edit' href='$edit_link'>edit</a> <a class='menu_item_delete' href='$delete_link'>delete</a>";
 		$config[ 'wrapper' ] = "<div>%s $links</div>";
 
@@ -468,13 +470,13 @@ Utils::debug( $form );
 		$objects = $term->object_types();
 
 		$active = false;
-		foreach($objects as $object_id => $type) {
-			switch($type) {
+		foreach( $objects as $object_id => $type ) {
+			switch( $type ) {
 				case 'post':
-					$post = Post::get(array('id' =>$object_id));
-					if($post instanceof Post) {
+					$post = Post::get( array( 'id' => $object_id ) );
+					if( $post instanceof Post ) {
 						$link = $post->permalink;
-						if($config['theme']->posts instanceof Post && $config['theme']->posts->id == $post->id) {
+						if( $config[ 'theme' ]->posts instanceof Post && $config[ 'theme' ]->posts->id == $post->id ) {
 							$active = true;
 						}
 					}
@@ -490,24 +492,24 @@ Utils::debug( $form );
 							break;
 						default:
 							$link = null;
-							$link = Plugins::filter('get_item_link', $link, $term, $object_id, $type);
+							$link = Plugins::filter( 'get_item_link', $link, $term, $object_id, $type );
 							break;
 					}
 					break;
 			}
 		}
 		$title = $term->term_display;
-		if(empty($link)) {
-			$config['wrapper'] = sprintf($config['linkwrapper'], $title);
+		if( empty( $link ) ) {
+			$config[ 'wrapper' ] = sprintf($config[ 'linkwrapper' ], $title);
 		}
 		else {
-			$config['wrapper'] = sprintf($config['linkwrapper'], "<a href=\"{$link}\">{$title}</a>");
+			$config[ 'wrapper' ] = sprintf( $config[ 'linkwrapper' ], "<a href=\"{$link}\">{$title}</a>" );
 		}
-		if($active) {
-			$config['itemattr']['class'] = 'active';
+		if( $active ) {
+			$config[ 'itemattr' ][ 'class' ] = 'active';
 		}
 		else {
-			$config['itemattr']['class'] = 'inactive';
+			$config[ 'itemattr' ][ 'class' ] = 'inactive';
 		}
 
 		return $config;
