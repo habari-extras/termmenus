@@ -412,7 +412,7 @@ Utils::debug( $form );
 		$menu = Vocabulary::get_by_id( $menu_vocab );
 		$term = new Term( array(
 			'term_display' => $form->spacer_text->value,
-			'term' => Utils::slugify( $form->spacer_text->value ),
+			'term' => Utils::slugify( ($form->spacer_text->value !== '' ? $form->spacer_text->value : 'menu_spacer' ) ),
 			));
 		$menu->add_term( $term );
 		$term->associate( 'menu', $this->item_types[ 'spacer' ] );
