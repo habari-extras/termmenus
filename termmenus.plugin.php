@@ -505,6 +505,7 @@ Utils::debug( $form );
 		$link = '';
 		$objects = $term->object_types();
 
+		$title = $term->term_display;
 		$active = false;
 		foreach( $objects as $object_id => $type ) {
 			switch( $type ) {
@@ -526,6 +527,10 @@ Utils::debug( $form );
 						case $item_types[ 'url' ]:
 							$link = $term->info->url;
 							break;
+						case $item_types[ 'spacer' ]:
+							if ( empty( $term->term_display ) ) {
+								$title = '&nbsp;';
+							}
 						default:
 							$link = null;
 							$link = Plugins::filter( 'get_item_link', $link, $term, $object_id, $type );
@@ -534,7 +539,6 @@ Utils::debug( $form );
 					break;
 			}
 		}
-		$title = $term->term_display;
 		if( empty( $link ) ) {
 			$config[ 'wrapper' ] = sprintf($config[ 'linkwrapper' ], $title);
 		}
