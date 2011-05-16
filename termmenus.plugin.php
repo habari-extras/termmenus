@@ -505,7 +505,6 @@ Utils::debug( $form );
 		$link = '';
 		$objects = $term->object_types();
 
-		$title = $term->term_display;
 		$active = false;
 		foreach( $objects as $object_id => $type ) {
 			switch( $type ) {
