@@ -305,13 +305,35 @@ class TermMenus extends Plugin
 				break;
 
 			case 'edit_term':
+				$term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
+				$menu_vocab = $term->vocabulary_id;
+				$term_type = '';
+				foreach( $term->object_types() as $object_id => $type ) {
+					// render_menu_item() does this as a foreach. I'm assuming there's only one type here, but I could be wrong. Is there a better way?
+					$term_type = $object_id;
+				}
+				$form = new FormUI( 'edit_term' );
+				$form->append( 'text', 'title', 'null:null', _t( 'Item Title', 'termmenus' ) )
+					->add_validator( 'validate_required' )
+					->value = $term->term_display;
+				if ( $term_type == 'url' ) {
+					$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
+						->add_validator( 'validate_required' )
+						->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) )
+						->value = $term->info->url;
+				}
+				$form->append( 'submit', 'submit', _t( 'Apply Changes', 'termmenus' ) );
+				$form->on_success( array( $this, 'edit_term_form_save' ) );
+				$theme->page_content = $form->get();
+
 				break;
+
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
 				$form->append( 'text', 'link_name', 'null:null', _t( 'Link title', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
 				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
-					->add_validator( 'validate_required', _t( 'URL is required.', 'termmenus' ) )
+					->add_validator( 'validate_required' )
 					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
 				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
@@ -338,6 +360,11 @@ Utils::debug( $_GET, $action ); die();
 		$vocab = Vocabulary::create($params);
 		Session::notice( _t( 'Created menu "%s".', array( $form->menuname->value ), 'termmenus' ) );
 		Utils::redirect( URL::get( 'admin', 'page=menus' ));
+	}
+
+	public function edit_term_form_save( $form )
+	{
+Utils::debug( $form );
 	}
 
 	public function create_link_form_save( $form )
@@ -456,7 +483,7 @@ Utils::debug( $_GET, $action ); die();
 					}
 					break;
 				case 'menu':
-					$time_types = $this->get_item_types();
+					$item_types = $this->get_item_types();
 					switch( $object_id ) {
 						case $item_types[ 'url' ]:
 							$link = $term->info->url;
