@@ -506,6 +506,7 @@ Utils::debug( $form );
 		$objects = $term->object_types();
 
 		$active = false;
+		$spacer = false;
 		foreach( $objects as $object_id => $type ) {
 			switch( $type ) {
 				case 'post':
@@ -530,6 +531,8 @@ Utils::debug( $form );
 							if ( empty( $term->term_display ) ) {
 								$title = '&nbsp;';
 							}
+							$spacer = true;
+							// no need to break, default below is just fine.
 						default:
 							$link = null;
 							$link = Plugins::filter( 'get_item_link', $link, $term, $object_id, $type );
@@ -550,7 +553,9 @@ Utils::debug( $form );
 		else {
 			$config[ 'itemattr' ][ 'class' ] = 'inactive';
 		}
-
+		if( $spacer ) {
+			$config[ 'itemattr' ][ 'class' ] .= ' spacer';
+		}
 		return $config;
 	}
 
