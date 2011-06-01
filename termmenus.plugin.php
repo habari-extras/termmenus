@@ -359,6 +359,12 @@ class TermMenus extends Plugin
 				$form->on_success( array( $this, 'create_spacer_form_save' ) );
 				$theme->page_content = $form->get();
 				break;			
+			case 'link_to_posts':
+				$form = new FormUI( 'link_to_posts' );
+// need a text box here plus ready function, etc. http://loopj.com/jquery-tokeninput/
+				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
+				$theme->page_content = $form->get();
+				break;
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
@@ -558,14 +564,44 @@ Utils::debug( $form );
 		}
 		return $config;
 	}
-
+	 /**
+	 * Add required Javascript and, for now, CSS.
+	 */
 	public function action_admin_header( $theme )
 	{
-		// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
 		if ( $theme->page == 'menus' ) {
+			// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
 			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ) );
+
+			// Add the callback URL.
+			$url = "PostTokens.url = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
+			Stack::add( 'admin_header_javascript', $url, 'post_tokens_url', 'post_tokens' );
 		}
 	}
-}
 
+	/**
+	 * Respond to Javascript callbacks
+	 * The name of this method is action_ajax_ followed by what you passed to the context parameter above.
+	 */
+	public function action_ajax_post_tokens( $handler )
+	{
+		// Get the data that was sent
+		$response = $handler->handler_vars[ 'q' ];
+		// Wipe anything else that's in the buffer
+		ob_end_clean();
+
+		$new_response = Posts::get( array( "title" => $response ) );
+
+		$final_response = array();
+		foreach ( $new_response as $post ) {
+						
+			$final_response[] = array(
+				'id' => $post->id,
+				'name' => $post->title,
+			);
+		}
+		// Send the response
+		echo json_encode( $final_response );
+	}
+}
 ?>
