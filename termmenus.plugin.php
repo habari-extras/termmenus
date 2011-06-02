@@ -258,6 +258,12 @@ class TermMenus extends Plugin
 				else {
 					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
 				}
+				$form->append( 'static', 'create posts link',
+					'<a href="' . URL::get('admin', array(
+						'page' => 'menus',
+						'action' => 'link_to_posts',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a>' );
 				$form->append( 'static', 'create link link',
 					'<a href="' . URL::get('admin', array(
 						'page' => 'menus',
