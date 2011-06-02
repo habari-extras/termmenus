@@ -373,7 +373,7 @@ class TermMenus extends Plugin
 				$form = new FormUI( 'link_to_posts' );
 				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
 				$post_ids->template = 'text_tokens';
-				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( PostTokens.url )";
+				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
 
 				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
@@ -592,7 +592,7 @@ Utils::debug( $form );
 			// Load the plugin
 			Stack::add( 'admin_header_javascript', Site::get_url( 'vendor' ) . "/jquery.tokeninput.js", 'jquery-tokeninput', 'jquery.ui' );
 			// Add the callback URL.
-			$url = "PostTokens.url = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
+			$url = "habari.url.ajaxPostTokens = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
 			Stack::add( 'admin_header_javascript', $url, 'post_tokens_url', 'post_tokens' );
 		}
 	}
