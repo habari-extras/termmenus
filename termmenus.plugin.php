@@ -589,8 +589,10 @@ Utils::debug( $form );
 			// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
 			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ) );
 
-			// Load the plugin
+			// Load the plugin and its css
 			Stack::add( 'admin_header_javascript', Site::get_url( 'vendor' ) . "/jquery.tokeninput.js", 'jquery-tokeninput', 'jquery.ui' );
+			Stack::add( 'admin_stylesheet', Site::get_url( 'admin_theme' ) . '/css/token-input.css', 'screen' );
+
 			// Add the callback URL.
 			$url = "habari.url.ajaxPostTokens = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
 			Stack::add( 'admin_header_javascript', $url, 'post_tokens_url', 'post_tokens' );
@@ -608,7 +610,7 @@ Utils::debug( $form );
 		// Wipe anything else that's in the buffer
 		ob_end_clean();
 
-		$new_response = Posts::get( array( "title" => $response ) );
+		$new_response = Posts::get( array( "title_search" => $response ) );
 
 		$final_response = array();
 		foreach ( $new_response as $post ) {
