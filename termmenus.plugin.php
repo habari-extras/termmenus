@@ -160,6 +160,7 @@ class TermMenus extends Plugin
 	 **/
 	public function action_publish_post( $post, $form )
 	{
+		// might not hurt to turn this into a function to be more DRY
 		$term_title = $post->title;
 		$selected_menus = $form->menus->value;
 		foreach( $this->get_menus() as $menu ) {
@@ -407,6 +408,32 @@ Utils::debug( $_GET, $action ); die();
 Utils::debug( $form );
 	}
 
+	public function link_to_posts_form_save( $form )
+	{
+		$menu_vocab = intval( $form->menu->value );
+		// create a term for the link, store the URL
+		$menu = Vocabulary::get_by_id( $menu_vocab );
+
+		$post_ids = explode( ',', $form->post_ids->value );
+		foreach( $post_ids as $post_id ) {
+			$post = Post::get( array( 'id' => $post_id ) );
+			$term_title = $post->title;
+
+			$terms = $menu->get_object_terms( 'post', $post->id );
+			if( count( $terms ) == 0 ) {
+				$term = new Term( array( 'term_display' => $post->title, 'term' => $post->slug ) );
+				$menu->add_term( $term );
+				$menu->set_object_terms( 'post', $post->id, array( $term->term ) );
+			}
+		}
+		Session::notice( _t( 'Link(s) added.', 'termmenus' ) );
+		Utils::redirect(URL::get( 'admin', array(
+			'page' => 'menus',
+			'action' => 'edit',
+			'menu' => $menu_vocab,
+			) ) );
+	}
+
 	public function create_link_form_save( $form )
 	{
 		$menu_vocab = intval( $form->menu->value );
@@ -427,7 +454,7 @@ Utils::debug( $form );
 			'menu' => $menu_vocab,
 			) ) );
 	}
-	
+
 	public function create_spacer_form_save( $form )
 	{
 		$menu_vocab = intval( $form->menu->value );
