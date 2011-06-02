@@ -371,10 +371,9 @@ class TermMenus extends Plugin
 
 			case 'link_to_posts':
 				$form = new FormUI( 'link_to_posts' );
-// need a text box here plus ready function, etc. http://loopj.com/jquery-tokeninput/
 				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
 				$post_ids->template = 'text_tokens';
-				$post_ids->ready_function = "$('#post_ids').tokenInput( PostTokens.url )";
+				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( PostTokens.url )";
 
 				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
