@@ -45,6 +45,9 @@ class TermMenus extends Plugin
 	{
 		$this->add_template( 'menus_admin', dirname( __FILE__ ) . '/menus_admin.php' );
 		$this->add_template( 'block.menu', dirname( __FILE__ ) . '/block.menu.php' );
+
+		// formcontrol for tokens
+		$this->add_template( 'text_tokens', dirname( __FILE__ ) . '/formcontrol_tokens.php' );
 	}
 
 	/**
@@ -358,10 +361,18 @@ class TermMenus extends Plugin
 
 				$form->on_success( array( $this, 'create_spacer_form_save' ) );
 				$theme->page_content = $form->get();
-				break;			
+				break;
+
 			case 'link_to_posts':
 				$form = new FormUI( 'link_to_posts' );
 // need a text box here plus ready function, etc. http://loopj.com/jquery-tokeninput/
+				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
+				$post_ids->template = 'text_tokens';
+				$post_ids->ready_function = "$('#post_ids').tokenInput( PostTokens.url )";
+
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
+
 				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
 				$theme->page_content = $form->get();
 				break;
@@ -573,6 +584,8 @@ Utils::debug( $form );
 			// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
 			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ) );
 
+			// Load the plugin
+			Stack::add( 'admin_header_javascript', Site::get_url( 'vendor' ) . "/jquery.tokeninput.js", 'jquery-tokeninput', 'jquery.ui' );
 			// Add the callback URL.
 			$url = "PostTokens.url = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
 			Stack::add( 'admin_header_javascript', $url, 'post_tokens_url', 'post_tokens' );
@@ -594,7 +607,7 @@ Utils::debug( $form );
 
 		$final_response = array();
 		foreach ( $new_response as $post ) {
-						
+
 			$final_response[] = array(
 				'id' => $post->id,
 				'name' => $post->title,
