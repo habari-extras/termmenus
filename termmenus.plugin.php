@@ -245,7 +245,9 @@ class TermMenus extends Plugin
 					// that's it, we're done. Maybe we show the list of menus instead?
 					break;
 				}
-				$theme->page_content = _t( "<h4>Editing <b>{$vocabulary->name}</b></h4>", 'termmenus' );
+				$top_url = URL::get( 'admin', 'page=menus' );
+
+				$theme->page_content = _t( "<h2><a href='$top_url'>Menus</a>: Editing <b>{$vocabulary->name}</b></h2><hr>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
 
 				if ( !$vocabulary->is_empty() ) {
@@ -259,24 +261,24 @@ class TermMenus extends Plugin
 				else {
 					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
 				}
-				$form->append( 'static', 'create posts link',
-					'<a href="' . URL::get('admin', array(
+				$edit_items = '<ul class="dropbutton">' .
+					'<li><a href="' . URL::get('admin', array(
 						'page' => 'menus',
 						'action' => 'link_to_posts',
 						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a>' );
-				$form->append( 'static', 'create link link',
-					'<a href="' . URL::get('admin', array(
+					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a></li>' .
+					'<li><a href="' . URL::get('admin', array(
 						'page' => 'menus',
 						'action' => 'create_link',
 						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a>' );
-				$form->append( 'static', 'create spacer link',
-					'<a href="' . URL::get('admin', array(
+					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a></li>' .
+					'<li><a href="' . URL::get('admin', array(
 						'page' => 'menus',
 						'action' => 'create_spacer',
 						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a>' );
+					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
+					'</ul>';
+				$form->append( 'static', 'action buttons', $edit_items );
 				$theme->page_content .= $form->get();
 				break;
 
@@ -306,10 +308,12 @@ class TermMenus extends Plugin
 					$menu_list .= "<li><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
 				}
 				if ( $menu_list != '' ) {
-					$theme->page_content = "<ul>$menu_list</ul>";
+					$theme->page_content = _t( "<h2>Menus</h2><hr><ul>$menu_list</ul>", 'termmenus' );
 				}
 				else {
-					$theme->page_content = _t( '<h2>No Menus have been created.</h2>', 'termmenus' );
+					$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
+
+					$theme->page_content = _t( '<h2>No Menus have been created.</h2><hr><p><a href="$edit_url">Create a Menu</a></p>', 'termmenus' );
 				}
 				break;
 
@@ -473,7 +477,7 @@ Utils::debug( $form );
 			'menu' => $menu_vocab,
 			) ) );
 	}
-	
+
 	public function validate_newvocab( $value, $control, $form )
 	{
 		if(Vocabulary::get( $value ) instanceof Vocabulary) {
@@ -503,7 +507,7 @@ Utils::debug( $form );
 			return $vocabularies;
 		}
 	}
-	
+
 	/**
 	* Provide a method for listing the types of menu items that are available
 	* @return array List of item types, keyed by name and having integer index values
