@@ -4,3 +4,11 @@
 	text-indent: -9999px;
 	width: 20px;
 }
+
+.edit_menu_dropbutton {
+	/* ugly hack but for the time being this works. @TODO make this CSS clean */
+	position: relative;
+	width: 10px;
+	left: 130px;
+	top: 5px;
+}	

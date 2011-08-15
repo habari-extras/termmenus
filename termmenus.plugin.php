@@ -259,9 +259,9 @@ class TermMenus extends Plugin
 					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 				}
 				else {
-					$form->append( 'static', 'message', _t( '<h2>No links yet.</h2>', 'termmenus' ) );
+					$form->append( 'static', 'message', _t( '<h3>No links yet.</h3>', 'termmenus' ) );
 				}
-				$edit_items = '<ul class="dropbutton">' .
+				$edit_items = '<div class="edit_menu_dropbutton"><ul class="dropbutton">' .
 					'<li><a href="' . URL::get('admin', array(
 						'page' => 'menus',
 						'action' => 'link_to_posts',
@@ -277,7 +277,7 @@ class TermMenus extends Plugin
 						'action' => 'create_spacer',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
-					'</ul>';
+					'</ul></div>';
 				$form->append( 'static', 'action buttons', $edit_items );
 				$theme->page_content .= $form->get();
 				break;
@@ -618,11 +618,11 @@ Utils::debug( $form );
 	{
 		if ( $theme->page == 'menus' ) {
 			// Ideally the plugin would reuse reusable portions of the existing admin CSS. Until then, let's only add the CSS needed on the menus page.
-			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ), 'style' );
+			Stack::add( 'admin_stylesheet', array( $this->get_url() . '/admin.css', 'screen' ), 'admin-css' );
 
 			// Load the plugin and its css
 			Stack::add( 'admin_header_javascript', Site::get_url( 'vendor' ) . "/jquery.tokeninput.js", 'jquery-tokeninput', 'jquery.ui' );
-			Stack::add( 'admin_stylesheet', array( Site::get_url( 'admin_theme' ) . '/css/token-input.css', 'screen' ), 'style' );
+			Stack::add( 'admin_stylesheet', array( Site::get_url( 'admin_theme' ) . '/css/token-input.css', 'screen' ), 'admin_tokeninput' );
 
 			// Add the callback URL.
 			$url = "habari.url.ajaxPostTokens = '" . URL::get( 'ajax', array( 'context' => 'post_tokens' ) ) . "';";
