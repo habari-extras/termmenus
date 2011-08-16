@@ -239,6 +239,7 @@ class TermMenus extends Plugin
 	public function action_admin_theme_get_menu_iframe( AdminHandler $handler, Theme $theme )
 	{
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
+		$form_action = URL::get( 'admin', array( 'page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit' ) );
 		switch( $action ) {
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
@@ -251,7 +252,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'create_link_form_save' ) );
-				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
+				$form->set_option( 'form_action', $form_action );
 				$theme->page_content = $form->get();
 				break;
 
@@ -262,7 +263,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'create_spacer_form_save' ) );
-				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
+				$form->set_option( 'form_action', $form_action );
 				$theme->page_content = $form->get();
 				break;
 
@@ -276,7 +277,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
-				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
+				$form->set_option( 'form_action', $form_action );
 				$theme->page_content = $form->get();
 				break;
 		}
