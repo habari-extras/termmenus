@@ -44,6 +44,7 @@ class TermMenus extends Plugin
 	public function action_init()
 	{
 		$this->add_template( 'menus_admin', dirname( __FILE__ ) . '/menus_admin.php' );
+		$this->add_template( 'menu_iframe', dirname( __FILE__ ) . '/menu_iframe.php' );
 		$this->add_template( 'block.menu', dirname( __FILE__ ) . '/block.menu.php' );
 
 		// formcontrol for tokens
@@ -211,7 +212,8 @@ class TermMenus extends Plugin
 	public function alias()
 	{
 		return array(
-			'action_admin_theme_get_menus' => 'action_admin_theme_post_menus'
+			'action_admin_theme_get_menus' => 'action_admin_theme_post_menus',
+			'action_admin_theme_get_menu_iframe' => 'action_admin_theme_post_menu_iframe',
 		);
 	}
 
@@ -222,11 +224,61 @@ class TermMenus extends Plugin
 	public function filter_admin_access_tokens( array $require_any, $page )
 	{
 		switch ( $page ) {
+			case 'menu_iframe':
 			case 'menus':
 				$require_any = array( 'manage_menus' => true );
 				break;
 		}
 		return $require_any;
+	}
+
+	/**
+	 * Minimal modal forms
+	 *
+	 **/
+	public function action_admin_theme_get_menu_iframe( AdminHandler $handler, Theme $theme )
+	{
+		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
+		switch( $action ) {
+			case 'create_link':
+				$form = new FormUI( 'create_link' );
+				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
+					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
+				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
+					->add_validator( 'validate_required' )
+					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
+
+				$form->on_success( array( $this, 'create_link_form_save' ) );
+				$theme->page_content = $form->get();
+				break;
+
+			case 'create_spacer':
+				$form = new FormUI( 'create_spacer' );
+				$form->append( 'text', 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
+
+				$form->on_success( array( $this, 'create_spacer_form_save' ) );
+				$theme->page_content = $form->get();
+				break;
+
+			case 'link_to_posts':
+				$form = new FormUI( 'link_to_posts' );
+				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
+				$post_ids->template = 'text_tokens';
+				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
+
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
+
+				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
+				$theme->page_content = $form->get();
+				break;
+		}
+		$theme->display( 'menu_iframe' );
+		exit;
 	}
 
 	/**
@@ -262,22 +314,22 @@ class TermMenus extends Plugin
 					$form->append( 'static', 'message', _t( '<h3>No links yet.</h3>', 'termmenus' ) );
 				}
 				$edit_items = '<div class="edit_menu_dropbutton"><ul class="dropbutton">' .
-					'<li><a href="' . URL::get('admin', array(
-						'page' => 'menus',
+					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
 						'action' => 'link_to_posts',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a></li>' .
-					'<li><a href="' . URL::get('admin', array(
-						'page' => 'menus',
+					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
 						'action' => 'create_link',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a></li>' .
-					'<li><a href="' . URL::get('admin', array(
-						'page' => 'menus',
+					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
 						'action' => 'create_spacer',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
-					'</ul></div>';
+					'</ul></div><script type="text/javascript">$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog(); return false;});</script>';
 				$form->append( 'static', 'action buttons', $edit_items );
 				$theme->page_content .= $form->get();
 				break;
@@ -349,7 +401,7 @@ class TermMenus extends Plugin
 				$theme->page_content = $form->get();
 
 				break;
-
+/* // moved to iframe above
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
 				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
@@ -386,6 +438,7 @@ class TermMenus extends Plugin
 				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
 				$theme->page_content = $form->get();
 				break;
+*/
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
