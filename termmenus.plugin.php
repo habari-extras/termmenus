@@ -251,6 +251,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'create_link_form_save' ) );
+				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
 				$theme->page_content = $form->get();
 				break;
 
@@ -261,6 +262,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'create_spacer_form_save' ) );
+				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
 				$theme->page_content = $form->get();
 				break;
 
@@ -274,6 +276,7 @@ class TermMenus extends Plugin
 				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
 
 				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
+				$form->set_option( 'form_action', URL::get( 'admin', array( 'page' => 'menus' ) ) );
 				$theme->page_content = $form->get();
 				break;
 		}
