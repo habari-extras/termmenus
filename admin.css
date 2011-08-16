@@ -12,3 +12,15 @@
 	left: 130px;
 	top: 5px;
 }	
+
+div#link_name.formcontrol label,
+div#link_url.formcontrol label {
+	width: 70px;
+	display: inline-block;
+	font-weight: bold;
+}
+
+div#link_name.formcontrol input,
+div#link_url.formcontrol input {
+	width: 350px;
+}

@@ -352,7 +352,7 @@ class TermMenus extends Plugin
 
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
-				$form->append( 'text', 'link_name', 'null:null', _t( 'Link title', 'termmenus' ) )
+				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
 				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
 					->add_validator( 'validate_required' )
