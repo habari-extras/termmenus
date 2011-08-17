@@ -333,7 +333,8 @@ class TermMenus extends Plugin
 						'action' => 'create_spacer',
 						'menu' => $vocabulary->id,
 					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
-					'</ul></div><script type="text/javascript">$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog(); return false;});</script>';
+					'</ul></div><script type="text/javascript">' .
+					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
 				$form->append( 'static', 'action buttons', $edit_items );
 				$theme->page_content .= $form->get();
 				break;
