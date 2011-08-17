@@ -24,3 +24,7 @@ div#link_name.formcontrol input,
 div#link_url.formcontrol input {
 	width: 350px;
 }
+
+div.token-input-dropdown {
+	z-index: 1009 !important;
+}
