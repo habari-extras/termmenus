@@ -239,7 +239,7 @@ class TermMenus extends Plugin
 	public function action_admin_theme_get_menu_iframe( AdminHandler $handler, Theme $theme )
 	{
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
-		$form_action = URL::get( 'admin', array( 'page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
+		$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
 		switch( $action ) {
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
@@ -280,6 +280,19 @@ class TermMenus extends Plugin
 		}
 		$form->properties['onsubmit'] = "$.post($('#{$action}').attr('action'), $('#create_link').serialize(), function(data){\$('#menu_popup').html(data);});return false;";
 		$theme->page_content = $form->get();
+		if(isset($_GET['result'])) {
+			switch($_GET['result']) {
+				case 'added':
+					$treeurl = URL::get('admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit')) . ' #edit_menu';
+					$msg = _t('Menu item added.');
+					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
+<script type="text/javascript">
+human_msg.display_msg('{$msg}');
+$('#edit_menu').load('{$treeurl}');
+</script>
+JAVSCRIPT_RESPONSE;
+			}
+		}
 		$theme->display( 'menu_iframe' );
 		exit;
 	}
@@ -510,9 +523,10 @@ Utils::debug( $form );
 
 		Session::notice( _t( 'Link added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
-			'page' => 'menus',
-			'action' => 'edit',
+			'page' => 'menu_iframe',
+			'action' => 'create_link',
 			'menu' => $menu_vocab,
+			'result' => 'added',
 			) ) );
 	}
 
