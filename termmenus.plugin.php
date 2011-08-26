@@ -239,7 +239,7 @@ class TermMenus extends Plugin
 	public function action_admin_theme_get_menu_iframe( AdminHandler $handler, Theme $theme )
 	{
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
-		$form_action = URL::get( 'admin', array( 'page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit' ) );
+		$form_action = URL::get( 'admin', array( 'page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
 		switch( $action ) {
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
@@ -253,7 +253,6 @@ class TermMenus extends Plugin
 
 				$form->on_success( array( $this, 'create_link_form_save' ) );
 				$form->set_option( 'form_action', $form_action );
-				$theme->page_content = $form->get();
 				break;
 
 			case 'create_spacer':
@@ -264,7 +263,6 @@ class TermMenus extends Plugin
 
 				$form->on_success( array( $this, 'create_spacer_form_save' ) );
 				$form->set_option( 'form_action', $form_action );
-				$theme->page_content = $form->get();
 				break;
 
 			case 'link_to_posts':
@@ -278,9 +276,10 @@ class TermMenus extends Plugin
 
 				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
 				$form->set_option( 'form_action', $form_action );
-				$theme->page_content = $form->get();
 				break;
 		}
+		$form->properties['onsubmit'] = "$.post($('#{$action}').attr('action'), $('#create_link').serialize(), function(data){\$('#menu_popup').html(data);});return false;";
+		$theme->page_content = $form->get();
 		$theme->display( 'menu_iframe' );
 		exit;
 	}
