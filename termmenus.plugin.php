@@ -502,9 +502,10 @@ Utils::debug( $form );
 		}
 		Session::notice( _t( 'Link(s) added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
-			'page' => 'menus',
-			'action' => 'edit',
+			'page' => 'menu_iframe',
+			'action' => 'link_to_posts',
 			'menu' => $menu_vocab,
+			'result' => 'added',
 			) ) );
 	}
 
@@ -543,9 +544,10 @@ Utils::debug( $form );
 
 		Session::notice( _t( 'Spacer added.', 'termmenus' ) );
 		Utils::redirect(URL::get( 'admin', array(
-			'page' => 'menus',
-			'action' => 'edit',
+			'page' => 'menu_iframe',
+			'action' => 'create_spacer',
 			'menu' => $menu_vocab,
+			'result' => 'added',
 			) ) );
 	}
 
