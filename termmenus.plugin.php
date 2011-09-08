@@ -243,6 +243,7 @@ class TermMenus extends Plugin
 		switch( $action ) {
 			case 'create_link':
 				$form = new FormUI( 'create_link' );
+				$form->class[] = 'tm_db_action';
 				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
 				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
@@ -257,6 +258,7 @@ class TermMenus extends Plugin
 
 			case 'create_spacer':
 				$form = new FormUI( 'create_spacer' );
+				$form->class[] = 'tm_db_action';
 				$form->append( 'text', 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
 				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
@@ -267,6 +269,7 @@ class TermMenus extends Plugin
 
 			case 'link_to_posts':
 				$form = new FormUI( 'link_to_posts' );
+				$form->class[] = 'tm_db_action';
 				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
 				$post_ids->template = 'text_tokens';
 				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
@@ -278,7 +281,7 @@ class TermMenus extends Plugin
 				$form->set_option( 'form_action', $form_action );
 				break;
 		}
-		$form->properties['onsubmit'] = "$.post($('#{$action}').attr('action'), $('#create_link').serialize(), function(data){\$('#menu_popup').html(data);});return false;";
+		$form->properties['onsubmit'] = "$.post($('#{$action}').attr('action'), $('.tm_db_action').serialize(), function(data){\$('#menu_popup').html(data);});return false;";
 		$theme->page_content = $form->get();
 		if(isset($_GET['result'])) {
 			switch($_GET['result']) {
