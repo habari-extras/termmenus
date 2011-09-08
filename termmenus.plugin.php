@@ -286,7 +286,7 @@ class TermMenus extends Plugin
 		if(isset($_GET['result'])) {
 			switch($_GET['result']) {
 				case 'added':
-					$treeurl = URL::get('admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit')) . ' #edit_menu';
+					$treeurl = URL::get('admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit')) . ' #edit_menu>*';
 					$msg = _t('Menu item added.');
 					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
 <script type="text/javascript">
@@ -350,8 +350,7 @@ JAVSCRIPT_RESPONSE;
 					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
 					'</ul></div><script type="text/javascript">' .
 					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
-				$form->append( 'static', 'action buttons', $edit_items );
-				$theme->page_content .= $form->get();
+				$theme->page_content .= $form->get() . $edit_items;
 				break;
 
 			case 'create':
