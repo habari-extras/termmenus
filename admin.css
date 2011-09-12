@@ -5,6 +5,11 @@
 	width: 20px;
 }
 
+.menu_item_edit {
+	float: right;
+	margin-right: 0.5em;
+}
+
 .edit_menu_dropbutton {
 	/* ugly hack but for the time being this works. @TODO make this CSS clean */
 	position: relative;

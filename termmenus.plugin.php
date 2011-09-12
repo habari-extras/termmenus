@@ -618,7 +618,7 @@ Utils::debug( $form );
 
 		// insert them into the wrapper
 		// @TODO _t() this line or replace it altogether.
-		$links = "<a class='menu_item_edit' href='$edit_link'>edit</a> <a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a>";
+		$links = "<a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a> <a class='menu_item_edit' href='$edit_link'>edit</a>";
 		$config[ 'wrapper' ] = "<div>%s $links</div>";
 
 		return $config;
