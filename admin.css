@@ -5,10 +5,29 @@
 	width: 20px;
 }
 
-.menu_item_edit {
+a.menu_item_edit,
+a.menu_item_edit:active
+ {
 	float: right;
 	margin-right: 0.5em;
+	color: #fff !important;
+	background: #333;
+	padding: 2px 5px;
+	font-size: 9px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-moz-box-shadow: 1px 1px 3px #999;
+	-webkit-box-shadow: 1px 1px 3px #999;
+	box-shadow: 1px 1px 3px #999;
+	text-decoration: none;
+	font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, Verdana, Sans-Serif;
 }
+
+a.menu_item_edit:hover {
+	background: #555;
+	text-decoration: none;
+}
+
 
 .edit_menu_dropbutton {
 	/* ugly hack but for the time being this works. @TODO make this CSS clean */
