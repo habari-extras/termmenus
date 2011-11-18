@@ -384,7 +384,7 @@ JAVSCRIPT_RESPONSE;
 				else {
 					$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
 
-					$theme->page_content = _t( '<h2>No Menus have been created.</h2><hr><p><a href="$edit_url">Create a Menu</a></p>', 'termmenus' );
+					$theme->page_content = _t( "<h2>No Menus have been created.</h2><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
 				}
 				break;
 
@@ -538,7 +538,7 @@ Utils::debug( $form );
 		$menu_vocab = intval( $form->menu->value );
 		$menu = Vocabulary::get_by_id( $menu_vocab );
 		$term = new Term( array(
-			'term_display' => $form->spacer_text->value,
+			'term_display' => ( $form->spacer_text->value !== '' ? $form->spacer_text->value : '&nbsp' ), // totally blank values collapse the term display in the formcontrol
 			'term' => Utils::slugify( ($form->spacer_text->value !== '' ? $form->spacer_text->value : 'menu_spacer' ) ),
 			));
 		$menu->add_term( $term );
