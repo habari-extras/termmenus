@@ -291,7 +291,7 @@ class TermMenus extends Plugin
 					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
 <script type="text/javascript">
 human_msg.display_msg('{$msg}');
-$('#edit_menu').load('{$treeurl}');
+$('#edit_menu').load('{$treeurl}', function(){controls.init();});
 </script>
 JAVSCRIPT_RESPONSE;
 			}
