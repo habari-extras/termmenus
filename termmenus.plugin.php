@@ -361,6 +361,7 @@ JAVSCRIPT_RESPONSE;
 				$form->append('text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
 					->add_validator('validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
 					->add_validator(array($this, 'validate_newvocab') );
+				$form->append('text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
 				$form->append('submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
 				$form->on_success(array($this, 'add_menu_form_save') );
 				$theme->page_content = $form->get();
@@ -435,7 +436,7 @@ Utils::debug( $_GET, $action ); die();
 	{
 		$params = array(
 			'name' => $form->menuname->value,
-			'description' => _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ),
+			'description' => ( $form->description->value === '' ? _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ) : $form->description->value ),
 			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
 		$vocab = Vocabulary::create($params);

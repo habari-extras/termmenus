@@ -52,3 +52,8 @@ div#link_url.formcontrol input {
 div.token-input-dropdown {
 	z-index: 1009 !important;
 }
+
+body.page-menus #menu_form.container label {
+	display: inline-block;
+	width: 7em;
+}
