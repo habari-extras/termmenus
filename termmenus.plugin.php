@@ -2,7 +2,6 @@
 /**
  * TermMenus
  *
- * @todo add domain to all _t() calls
  * @todo style everything so it looks good
  */
 class TermMenus extends Plugin
@@ -289,8 +288,8 @@ class TermMenus extends Plugin
 		if(isset($_GET['result'])) {
 			switch($_GET['result']) {
 				case 'added':
-					$treeurl = URL::get('admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit')) . ' #edit_menu>*';
-					$msg = _t('Menu item added.');
+					$treeurl = URL::get( 'admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit') ) . ' #edit_menu>*';
+					$msg = _t( 'Menu item added.', 'termmenus' );
 					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
 <script type="text/javascript">
 human_msg.display_msg('{$msg}');
