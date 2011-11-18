@@ -49,6 +49,9 @@ class TermMenus extends Plugin
 
 		// formcontrol for tokens
 		$this->add_template( 'text_tokens', dirname( __FILE__ ) . '/formcontrol_tokens.php' );
+
+		// i18n
+		$this->load_text_domain( 'termmenus' );
 	}
 
 	/**
@@ -420,44 +423,6 @@ JAVSCRIPT_RESPONSE;
 				$theme->page_content = $form->get();
 
 				break;
-/* // moved to iframe above
-			case 'create_link':
-				$form = new FormUI( 'create_link' );
-				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
-					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
-				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
-					->add_validator( 'validate_required' )
-					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
-				$form->append( 'submit', 'submit', _t( 'Add link', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'create_link_form_save' ) );
-				$theme->page_content = $form->get();
-				break;
-
-			case 'create_spacer':
-				$form = new FormUI( 'create_spacer' );
-				$form->append( 'text', 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
-				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'create_spacer_form_save' ) );
-				$theme->page_content = $form->get();
-				break;
-
-			case 'link_to_posts':
-				$form = new FormUI( 'link_to_posts' );
-				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
-				$post_ids->template = 'text_tokens';
-				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
-
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
-				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'link_to_posts_form_save' ) );
-				$theme->page_content = $form->get();
-				break;
-*/
 			default:
 Utils::debug( $_GET, $action ); die();
 		}
