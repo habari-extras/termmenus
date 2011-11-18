@@ -2,6 +2,8 @@
 /**
  * TermMenus
  *
+ * @todo allow renaming/editing of menu items
+ * @todo allow deleting of menus
  * @todo style everything so it looks good
  */
 class TermMenus extends Plugin
@@ -379,7 +381,7 @@ JAVSCRIPT_RESPONSE;
 					) );
 					$menu_name = $menu->name;
 					// @TODO _t() this line or replace it altogether
-					$menu_list .= "<li><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
 				}
 				if ( $menu_list != '' ) {
 					$theme->page_content = _t( "<h2>Menus</h2><hr><ul>$menu_list</ul>", 'termmenus' );

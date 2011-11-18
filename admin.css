@@ -37,6 +37,7 @@ a.menu_item_edit:hover {
 	top: 5px;
 }	
 
+div#title.formcontrol label,
 div#link_name.formcontrol label,
 div#link_url.formcontrol label {
 	width: 70px;
@@ -44,13 +45,23 @@ div#link_url.formcontrol label {
 	font-weight: bold;
 }
 
+div#title.formcontrol input,
 div#link_name.formcontrol input,
 div#link_url.formcontrol input {
 	width: 350px;
 }
 
+div#menu_form.container ul a {
+	text-decoration: none;
+	display: block;
+}
+
 div.token-input-dropdown {
 	z-index: 1009 !important;
+}
+
+body.page-menus div#menu_form.container {
+	min-height: 75px;
 }
 
 body.page-menus #menu_form.container label {
