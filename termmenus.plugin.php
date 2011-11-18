@@ -5,6 +5,7 @@
  * @todo allow renaming/editing of menu items
  * @todo allow deleting of menus
  * @todo style everything so it looks good
+ @ @todo PHPDoc
  */
 class TermMenus extends Plugin
 {
@@ -206,6 +207,24 @@ class TermMenus extends Plugin
 			'text' => _t( 'Menus', 'termmenus' ),
 			'hotkey' => $last_used[ 'hotkey' ] + 1,
 		);
+
+		// add to main menu
+		$item_menu = array( 'menus' =>
+			array(
+				'url' => URL::get( 'admin', 'page=menus' ),
+				'title' => _t( 'Menus', 'termmenus' ),
+				'text' => _t( 'Menus', 'termmenus' ),
+				'hotkey' => 'E',
+				'selected' => false
+			)
+		);
+
+		$slice_point = array_search( 'themes', array_keys( $menu ) ); // Element will be inserted before "themes"
+		$pre_slice = array_slice( $menu, 0, $slice_point);
+		$post_slice = array_slice( $menu, $slice_point);
+
+		$menu = array_merge( $pre_slice, $item_menu, $post_slice );
+
 		return $menu;
 	}
 
@@ -379,9 +398,16 @@ JAVSCRIPT_RESPONSE;
 						'action' => 'edit',
 						'menu' => $menu->id,
 					) );
+					$delete_link = URL::get( 'admin', array(
+						'page' => 'menus',
+						'action' => 'delete_menu',
+						'menu' => $menu->id,
+					) );
 					$menu_name = $menu->name;
 					// @TODO _t() this line or replace it altogether
-					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a></li>";
+					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a>" .
+						" <a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a></li>";
+
 				}
 				if ( $menu_list != '' ) {
 					$theme->page_content = _t( "<h2>Menus</h2><hr><ul>$menu_list</ul>", 'termmenus' );
@@ -391,6 +417,14 @@ JAVSCRIPT_RESPONSE;
 
 					$theme->page_content = _t( "<h2>No Menus have been created.</h2><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
 				}
+				break;
+
+			case 'delete_menu':
+				$menu_vocab = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
+				$menu_vocab->delete();
+				// log that it has been deleted?
+				Session::notice( _t( 'Menu deleted.', 'termmenus' ) );
+				Utils::redirect( URL::get( 'admin', 'page=menus' ) );
 				break;
 
 			case 'delete_term':
