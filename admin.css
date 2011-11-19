@@ -23,8 +23,9 @@ a.menu_item_edit:active
 	font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, Verdana, Sans-Serif;
 }
 
-body.page-menus #menu_list a b {
-	margin-right: 1em;
+body.page-menus #menu_list a em {
+	font-style: italic;
+	margin: 0 1em;
 }
 
 a.menu_item_edit:hover {
@@ -104,8 +105,12 @@ div.token-input-dropdown {
 	z-index: 1009 !important;
 }
 
+div#menu_form.container form#edit_menu h3 {
+	margin: 0 0 10px 0;
+}
+
 body.page-menus div#menu_form.container {
-	min-height: 75px;
+	min-height: 125px;
 }
 
 body.page-menus #menu_form.container label {

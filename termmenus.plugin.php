@@ -3,8 +3,8 @@
  * TermMenus
  *
  * @todo allow renaming/editing of menu items
- * @todo allow deleting of menus
  * @todo style everything so it looks good
+ * @todo show description with name on post publish checkboxes
  * @todo PHPDoc
  * @todo ACL, CSRF, etc.
  */
@@ -311,7 +311,7 @@ class TermMenus extends Plugin
 			switch($_GET['result']) {
 				case 'added':
 					$treeurl = URL::get( 'admin', array('page' => 'menus', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => 'edit') ) . ' #edit_menu>*';
-					$msg = _t( 'Menu item added.', 'termmenus' );
+					$msg = _t( 'Menu item added.', 'termmenus' ); // @todo: update this to reflect if more than one item has been added, or reword entirely.
 					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
 <script type="text/javascript">
 human_msg.display_msg('{$msg}');
@@ -360,7 +360,7 @@ JAVSCRIPT_RESPONSE;
 					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 				}
 				else {
-					$form->append( 'static', 'message', _t( '<h3>No links yet.</h3>', 'termmenus' ) );
+					$form->append( 'static', 'message', _t( '<h3>No items yet.</h3>', 'termmenus' ) );
 				}
 				$edit_items = '<div class="edit_menu_dropbutton"><ul class="dropbutton">' .
 					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
@@ -372,7 +372,7 @@ JAVSCRIPT_RESPONSE;
 						'page' => 'menu_iframe',
 						'action' => 'create_link',
 						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a link URL', 'termmenus' ) . '</a></li>' .
+					) ) . '">' . _t( 'Link to a URL', 'termmenus' ) . '</a></li>' .
 					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
 						'page' => 'menu_iframe',
 						'action' => 'create_spacer',
@@ -430,16 +430,16 @@ JAVSCRIPT_RESPONSE;
 					) );
 					$menu_name = $menu->name;
 					// @TODO _t() this line or replace it altogether
-					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> {$menu->description} - {$menu->count_total()} items</a>" .
+					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> <em>{$menu->description}</em> {$menu->count_total()} items</a>" .
 						" <a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a></li>";
 
 				}
+				$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
+
 				if ( $menu_list != '' ) {
-					$theme->page_content = _t( "<h2>Menus</h2><hr><ul id='menu_list'>$menu_list</ul>", 'termmenus' );
+					$theme->page_content = _t( "<h2>Menus</h2><hr><ul id='menu_list'>$menu_list</ul><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
 				}
 				else {
-					$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
-
 					$theme->page_content = _t( "<h2>No Menus have been created.</h2><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
 				}
 				break;
