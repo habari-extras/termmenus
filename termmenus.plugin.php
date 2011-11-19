@@ -467,10 +467,10 @@ JAVSCRIPT_RESPONSE;
 				$term_type = '';
 				foreach( $term->object_types() as $object_id => $type ) {
 					// render_menu_item() does this as a foreach. I'm assuming there's only one type here, but I could be wrong. Is there a better way?
-					$term_type = $object_id;
+					$term_type = array_search( $object_id, $this->item_types );;
 				}
 				$form = new FormUI( 'edit_term' );
-				$form->append( 'text', 'title', 'null:null', _t( 'Item Title', 'termmenus' ) )
+				$form->append( 'text', 'title', 'null:null', ( $term_type !== 'spacer' ? _t( 'Item Title', 'termmenus' ) : _t( 'Spacer Text', 'termmenus' ) ) )
 					->add_validator( 'validate_required' )
 					->value = $term->term_display;
 				if ( $term_type == 'url' ) {
@@ -479,6 +479,8 @@ JAVSCRIPT_RESPONSE;
 						->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) )
 						->value = $term->info->url;
 				}
+				$form->append( 'hidden', 'term' )->value = $term->id;
+				$form->append( 'hidden', 'type' )->value = $term_type;
 				$form->append( 'submit', 'submit', _t( 'Apply Changes', 'termmenus' ) );
 				$form->on_success( array( $this, 'edit_term_form_save' ) );
 				$theme->page_content = $form->get();
@@ -525,7 +527,8 @@ Utils::debug( $_GET, $action ); die();
 
 	public function edit_term_form_save( $form )
 	{
-Utils::debug( $form );
+		$term = Term::get( intval( (string) $form->term ) );
+Utils::debug( $term );
 	}
 
 	public function link_to_posts_form_save( $form )
