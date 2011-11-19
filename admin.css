@@ -32,13 +32,12 @@ a.menu_item_edit:hover {
 	text-decoration: none;
 }
 
-
 .edit_menu_dropbutton {
 	/* ugly hack but for the time being this works. @TODO make this CSS clean */
 	position: relative;
 	width: 10px;
 	left: 130px;
-	top: 5px;
+	/* top: 5px; */
 }	
 
 div#title.formcontrol label,
@@ -53,6 +52,48 @@ div#title.formcontrol input,
 div#link_name.formcontrol input,
 div#link_url.formcontrol input {
 	width: 350px;
+}
+
+div#save.formcontrol {
+	margin-top: 15px;
+}
+
+div#menu_form.container div#menu_vocab em { /* menu description on edit page */
+	font-style: italic;
+	color: #BBB;
+	margin-left: 1em;
+}
+
+div#menu_form.container div#menu_vocab { /* box around menu title and description on edit page */
+	background-color: #666;
+	border: 1px solid #888;
+	border-radius: 5px 5px 5px 5px;
+	color: white;
+	padding: 10px 15px;
+	margin: 10px 0px;
+	font-size: 1.6em;
+}
+
+div#menu_form.container div#menu_vocab a.menu_vocab_edit,
+div#menu_form.container div#menu_vocab a.menu_vocab_edit:active { /*edit link in box around menu title */
+	float: right;
+	margin-right: 0.5em;
+	color: #000 !important;
+	background: #DDD;
+	padding: 3px 8px;
+	font-size: 13px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-moz-box-shadow: 1px 1px 3px #666;
+	-webkit-box-shadow: 1px 1px 3px #666;
+	box-shadow: 1px 1px 3px #666;
+	text-decoration: none;
+	font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, Verdana, Sans-Serif;
+}
+
+div#menu_form.container div#menu_vocab a.menu_vocab_edit:hover {
+	background: #BBB;
+	color: #333;
 }
 
 div#menu_form.container ul a {

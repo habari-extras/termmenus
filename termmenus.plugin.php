@@ -341,8 +341,14 @@ JAVSCRIPT_RESPONSE;
 					break;
 				}
 				$top_url = URL::get( 'admin', 'page=menus' );
+				$edit_link = URL::get( 'admin', array(
+					'page' => 'menus',
+					'action' => 'rename',
+					'menu' => $vocabulary->id,
+				) );
 
-				$theme->page_content = _t( "<h2><a href='$top_url'>Menus</a>: Editing <b>{$vocabulary->name}</b></h2><hr>", 'termmenus' );
+				$theme->page_content = _t( "<h2><a href='$top_url'>Menus</a>: Editing <b>{$vocabulary->name}</b></h2>", 'termmenus' );
+				$theme->page_content .= _t( "<div id='menu_vocab'><b>{$vocabulary->name}</b> <em>{$vocabulary->description}</em><a class='menu_vocab_edit' title='Rename or modify description' href='$edit_link'>Edit</a></div>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
 
 				if ( !$vocabulary->is_empty() ) {
@@ -380,12 +386,30 @@ JAVSCRIPT_RESPONSE;
 			case 'create':
 
 				$form = new FormUI('create_menu');
-				$form->append('text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
-					->add_validator('validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
-					->add_validator(array($this, 'validate_newvocab') );
-				$form->append('text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
-				$form->append('submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
-				$form->on_success(array($this, 'add_menu_form_save') );
+				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
+					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
+					->add_validator( array($this, 'validate_newvocab' ) );
+				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
+				$form->append( 'submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
+				$form->on_success( array( $this, 'add_menu_form_save' ) );
+				$theme->page_content = $form->get();
+
+				break;
+
+			case 'rename':
+				$menu_vocab = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
+
+				$form = new FormUI( 'modify_menu' );
+				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
+					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
+					->add_validator( array( $this, 'validate_newvocab' ) )
+					->value = $menu_vocab->name;
+				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) )
+					->value = $menu_vocab->description;
+				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+				$form->append( 'hidden', 'oldname' )->value = $menu_vocab->name;
+				$form->append( 'submit', 'submit', _t( 'Update Menu', 'termmenus' ) );
+				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content = $form->get();
 
 				break;
@@ -481,6 +505,24 @@ Utils::debug( $_GET, $action ); die();
 		Utils::redirect( URL::get( 'admin', 'page=menus' ));
 	}
 
+	public function rename_menu_form_save( $form )
+	{
+		// get the menu from the form, grab the values, modify the vocabulary.
+		$menu_vocab = intval( $form->menu->value );
+		// create a term for the link, store the URL
+		$menu = Vocabulary::get_by_id( $menu_vocab );
+		$menu->name = $form->menuname->value; // could use Vocabulary::rename for this
+		$menu->description = $form->description->value; // no Vocabulary function for this
+		$menu->update();
+
+		Session::notice( _t( 'Updated menu "%s".', array( $form->menuname->value ), 'termmenus' ) );
+		Utils::redirect( URL::get( 'admin', array(
+			'page' => 'menus',
+			'action' => 'edit',
+			'menu' => $menu->id,
+		) ) );
+	}
+
 	public function edit_term_form_save( $form )
 	{
 Utils::debug( $form );
@@ -557,6 +599,9 @@ Utils::debug( $form );
 
 	public function validate_newvocab( $value, $control, $form )
 	{
+		if( ( $form->oldname->value ) && ( $value == $form->oldname->value ) ) {
+			return array();
+		}
 		if(Vocabulary::get( $value ) instanceof Vocabulary) {
 			return array( _t( 'Please choose a vocabulary name that does not already exist.', 'termmenus' ) );
 		}
