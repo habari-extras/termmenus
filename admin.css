@@ -23,6 +23,10 @@ a.menu_item_edit:active
 	font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, Verdana, Sans-Serif;
 }
 
+body.page-menus #menu_list a b {
+	margin-right: 1em;
+}
+
 a.menu_item_edit:hover {
 	background: #555;
 	text-decoration: none;
@@ -53,7 +57,6 @@ div#link_url.formcontrol input {
 
 div#menu_form.container ul a {
 	text-decoration: none;
-	display: block;
 }
 
 div.token-input-dropdown {

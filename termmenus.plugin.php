@@ -5,7 +5,8 @@
  * @todo allow renaming/editing of menu items
  * @todo allow deleting of menus
  * @todo style everything so it looks good
- @ @todo PHPDoc
+ * @todo PHPDoc
+ * @todo ACL, CSRF, etc.
  */
 class TermMenus extends Plugin
 {
@@ -410,7 +411,7 @@ JAVSCRIPT_RESPONSE;
 
 				}
 				if ( $menu_list != '' ) {
-					$theme->page_content = _t( "<h2>Menus</h2><hr><ul>$menu_list</ul>", 'termmenus' );
+					$theme->page_content = _t( "<h2>Menus</h2><hr><ul id='menu_list'>$menu_list</ul>", 'termmenus' );
 				}
 				else {
 					$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
