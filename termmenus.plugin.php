@@ -513,7 +513,9 @@ Utils::debug( $_GET, $action ); die();
 		$menu_vocab = intval( $form->menu->value );
 		// create a term for the link, store the URL
 		$menu = Vocabulary::get_by_id( $menu_vocab );
-		$menu->name = $form->menuname->value; // could use Vocabulary::rename for this
+		if( $menu->name != $form->menuname->value ) {
+			$menu->name = $form->menuname->value; // could use Vocabulary::rename for this
+		}
 		$menu->description = $form->description->value; // no Vocabulary function for this
 		$menu->update();
 
