@@ -347,8 +347,8 @@ JAVSCRIPT_RESPONSE;
 					'menu' => $vocabulary->id,
 				) );
 
-				$theme->page_content = _t( "<h2><a href='$top_url'>Menus</a>: Editing <b>{$vocabulary->name}</b></h2>", 'termmenus' );
-				$theme->page_content .= _t( "<div id='menu_vocab'><b>{$vocabulary->name}</b> <em>{$vocabulary->description}</em><a class='menu_vocab_edit' title='Rename or modify description' href='$edit_link'>Edit</a></div>", 'termmenus' );
+				$theme->page_content = _t( "<h2><b>{$vocabulary->name}</b> <small>{$vocabulary->description}</small></h2>", 'termmenus' );
+				$theme->page_content .= _t( "<a title='Rename or modify description' href='$edit_link'>Rename/Change Description</a>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
 
 				if ( !$vocabulary->is_empty() ) {
