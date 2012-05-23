@@ -192,6 +192,22 @@ class TermMenus extends Plugin
 	 *
 	 **/
 	public function filter_adminhandler_post_loadplugins_main_menu( $menu ) {
+		$menus_array = array( 'create_menu' => array(
+			'title' => "Create a new Menu",
+			'text' => "New Menu",
+			'hotkey' => 'N',
+			'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ),
+		));
+
+		foreach ( $this->get_menus() as $item  ) {
+			$menus_array[ $item->id ] = array(
+				'title' => "{$item->name}: {$item->description}",
+				'text' => $item->name,
+				'hotkey' => count( $menus_array),
+				'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'edit', 'menu' => $item->id )),
+			);
+		}
+
 		// add to main menu
 		$item_menu = array( 'menus' =>
 			array(
@@ -199,7 +215,8 @@ class TermMenus extends Plugin
 				'title' => _t( 'Menus', 'termmenus' ),
 				'text' => _t( 'Menus', 'termmenus' ),
 				'hotkey' => 'E',
-				'selected' => false
+				'selected' => false,
+				'submenu' => $menus_array,
 			)
 		);
 
@@ -395,36 +412,6 @@ JAVSCRIPT_RESPONSE;
 				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content = $form->get();
 
-				break;
-
-			case 'list':
-				$menu_list = '';
-
-				foreach ( $this->get_menus() as $menu ) {
-					$edit_link = URL::get( 'admin', array(
-						'page' => 'menus',
-						'action' => 'edit',
-						'menu' => $menu->id,
-					) );
-					$delete_link = URL::get( 'admin', array(
-						'page' => 'menus',
-						'action' => 'delete_menu',
-						'menu' => $menu->id,
-					) );
-					$menu_name = $menu->name;
-					// @TODO _t() this line or replace it altogether
-					$menu_list .= "<li class='item'><a href='$edit_link'><b>$menu_name</b> <em>{$menu->description}</em> {$menu->count_total()} items</a>" .
-						" <a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a></li>";
-
-				}
-				$edit_url = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) );
-
-				if ( $menu_list != '' ) {
-					$theme->page_content = _t( "<h2>Menus</h2><hr><ul id='menu_list'>$menu_list</ul><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
-				}
-				else {
-					$theme->page_content = _t( "<h2>No Menus have been created.</h2><hr><p><a href='$edit_url'>Create a Menu</a></p>", 'termmenus' );
-				}
 				break;
 
 			case 'delete_menu':
