@@ -472,9 +472,9 @@ Utils::debug( $_GET, $action ); die();
 			'description' => ( $form->description->value === '' ? _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ) : $form->description->value ),
 			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
-		$vocab = Vocabulary::create($params);
-		Session::notice( _t( 'Created menu "%s".', array( $form->menuname->value ), 'termmenus' ) );
-		Utils::redirect( URL::get( 'admin', 'page=menus' ));
+		$vocab = Vocabulary::create( $params );
+
+		Utils::redirect( URL::get( 'admin', array( 'page' => 'menus', 'action' => 'edit', 'menu' => $vocab->id ) ) );
 	}
 
 	public function rename_menu_form_save( $form )
@@ -574,7 +574,7 @@ Utils::debug( $term );
 
 	public function validate_newvocab( $value, $control, $form )
 	{
-		if( ( $form->oldname->value ) && ( $value == $form->oldname->value ) ) {
+		if( isset( $form->oldname ) && ( $form->oldname->value ) && ( $value == $form->oldname->value ) ) {
 			return array();
 		}
 		if(Vocabulary::get( $value ) instanceof Vocabulary) {
