@@ -192,23 +192,6 @@ class TermMenus extends Plugin
 	 *
 	 **/
 	public function filter_adminhandler_post_loadplugins_main_menu( $menu ) {
-		// obtain existing last submenu item
-		$last_used = end( $menu[ 'create' ][ 'submenu' ]);
-		// add a menu item at the bottom
-		$menu[ 'create' ][ 'submenu' ][] = array(
-			'title' => _t( 'Create a new Menu', 'termmenus' ),
-			'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ),
-			'text' => _t( 'Menu', 'termmenus' ),
-			'hotkey' => $last_used[ 'hotkey' ] + 1, // next available hotkey is last used + 1
-		);
-		$last_used = end( $menu[ 'manage' ][ 'submenu' ]);
-		$menu[ 'manage' ][ 'submenu' ][] = array(
-			'title' => _t( 'Manage Menus', 'termmenus' ),
-			'url' => URL::get( 'admin', 'page=menus' ), // might as well make listing the existing menus the default
-			'text' => _t( 'Menus', 'termmenus' ),
-			'hotkey' => $last_used[ 'hotkey' ] + 1,
-		);
-
 		// add to main menu
 		$item_menu = array( 'menus' =>
 			array(
