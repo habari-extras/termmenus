@@ -262,7 +262,7 @@ class TermMenus extends Plugin
 	 **/
 	public function action_admin_theme_get_menu_iframe( AdminHandler $handler, Theme $theme )
 	{
-		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
+		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'create';
 		$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
 		switch( $action ) {
 			case 'create_link':
@@ -331,7 +331,7 @@ JAVSCRIPT_RESPONSE;
 	public function action_admin_theme_get_menus( AdminHandler $handler, Theme $theme )
 	{
 		$theme->page_content = '';
-		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'list';
+		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'create';
 		switch( $action ) {
 			case 'edit':
 				$vocabulary = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
