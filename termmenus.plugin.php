@@ -203,7 +203,7 @@ class TermMenus extends Plugin
 
 		$items = 0;
 		foreach ( $this->get_menus() as $item  ) {
-			$menus_array[ $items++ ] = array(
+			$menus_array[ ++$items ] = array(
 				'title' => "{$item->name}: {$item->description}",
 				'text' => $item->name,
 				'hotkey' => $items,
@@ -211,7 +211,9 @@ class TermMenus extends Plugin
 				'access' => array( 'manage_menus' => true ),
 			);
 		}
-		$menus_array[0]['class'] = 'under-spacer';
+		if ( count( $menus_array ) > 1 ) {
+			$menus_array[1]['class'] = 'under-spacer';
+		}
 
 		// add to main menu
 		$item_menu = array( 'menus' =>
