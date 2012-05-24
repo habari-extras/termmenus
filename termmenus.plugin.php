@@ -197,16 +197,21 @@ class TermMenus extends Plugin
 			'text' => "New Menu",
 			'hotkey' => 'N',
 			'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ),
+			'class' => 'over-spacer',
+			'access' => array( 'manage_menus' => true ),
 		));
 
+		$items = 0;
 		foreach ( $this->get_menus() as $item  ) {
-			$menus_array[ $item->id ] = array(
+			$menus_array[ $items++ ] = array(
 				'title' => "{$item->name}: {$item->description}",
 				'text' => $item->name,
-				'hotkey' => count( $menus_array),
+				'hotkey' => $items,
 				'url' => URL::get( 'admin', array( 'page' => 'menus', 'action' => 'edit', 'menu' => $item->id )),
+				'access' => array( 'manage_menus' => true ),
 			);
 		}
+		$menus_array[0]['class'] = 'under-spacer';
 
 		// add to main menu
 		$item_menu = array( 'menus' =>
