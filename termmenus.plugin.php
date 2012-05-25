@@ -358,36 +358,37 @@ JAVSCRIPT_RESPONSE;
 				$theme->page_content .= _t( "<a title='Rename or modify description' href='$edit_link'>Rename/Change Description</a>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
 
+				$edit_items = '<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
+						'action' => 'link_to_posts',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a>' .
+					'<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
+						'action' => 'create_link',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Link to a URL', 'termmenus' ) . '</a>' .
+					'<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
+						'page' => 'menu_iframe',
+						'action' => 'create_spacer',
+						'menu' => $vocabulary->id,
+					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a>' .
+					'<script type="text/javascript">' .
+					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
+
 				if ( !$vocabulary->is_empty() ) {
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
 					$form->tree->config = array( 'itemcallback' => array( $this, 'tree_item_callback' ) );
 //						$form->tree->value = $vocabulary->get_root_terms();
 					// append other needed controls, if there are any.
 
+					$form->append( 'static', 'buttons', _t( "<div id='menu_item_button_container'>$edit_items</div>", 'termmenus' ) );
 					$form->append( 'submit', 'save', _t( 'Apply Changes', 'termmenus' ) );
 				}
 				else {
-					$form->append( 'static', 'message', _t( '<h3>No items yet.</h3>', 'termmenus' ) );
+					$form->append( 'static', 'buttons', _t( "<div id='menu_item_button_container'>$edit_items</div>", 'termmenus' ) );
 				}
-				$edit_items = '<div class="edit_menu_dropbutton"><ul class="dropbutton">' .
-					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'link_to_posts',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a></li>' .
-					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'create_link',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Link to a URL', 'termmenus' ) . '</a></li>' .
-					'<li><a class="modal_popup_form" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'create_spacer',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a></li>' .
-					'</ul></div><script type="text/javascript">' .
-					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
-				$theme->page_content .= $form->get() . $edit_items;
+				$theme->page_content .= $form->get();
 				break;
 
 			case 'create':
