@@ -50,10 +50,14 @@ a.menu_button_dark:hover {
 	text-decoration: none;
 }
 
+div#menu_form ol.tree, ol.tree ol {
+	margin-left: 0;
+}
+
 div#menu_item_button_container  {
 	padding: 6px 3px 8px 3px;
 	background: #999;
-	margin: 0 0 0 15px;
+	margin: 0 0 0 0;
 }
 
 div#title.formcontrol label,

@@ -347,16 +347,17 @@ JAVSCRIPT_RESPONSE;
 					// that's it, we're done. Maybe we show the list of menus instead?
 					break;
 				}
-				$top_url = URL::get( 'admin', 'page=menus' );
-				$edit_link = URL::get( 'admin', array(
-					'page' => 'menus',
-					'action' => 'rename',
-					'menu' => $vocabulary->id,
-				) );
 
-				$theme->page_content = _t( "<h2><b>{$vocabulary->name}</b> <small>{$vocabulary->description}</small></h2>", 'termmenus' );
-				$theme->page_content .= _t( "<a title='Rename or modify description' href='$edit_link'>Rename/Change Description</a>", 'termmenus' );
 				$form = new FormUI( 'edit_menu' );
+
+				$form->append( new FormControlText( 'menuname', 'null:null', _t( 'Name', 'termmenus' ) ) )
+					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
+					->add_validator( array( $this, 'validate_newvocab' ) )
+					->value = $vocabulary->name;
+				$form->append( new FormControlHidden( 'oldname', 'null:null' ) )->value = $vocabulary->name;
+
+				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ) ) )
+					->value = $vocabulary->description;
 
 				$edit_items = '<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
 						'page' => 'menu_iframe',
@@ -388,11 +389,12 @@ JAVSCRIPT_RESPONSE;
 				else {
 					$form->append( 'static', 'buttons', _t( "<div id='menu_item_button_container'>$edit_items</div>", 'termmenus' ) );
 				}
+				$form->append( new FormControlHidden( 'menu', 'null:null' ) )->value = $handler->handler_vars[ 'menu' ];
+				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content .= $form->get();
 				break;
 
 			case 'create':
-
 				$form = new FormUI('create_menu');
 				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
@@ -400,24 +402,6 @@ JAVSCRIPT_RESPONSE;
 				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
 				$form->append( 'submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
 				$form->on_success( array( $this, 'add_menu_form_save' ) );
-				$theme->page_content = $form->get();
-
-				break;
-
-			case 'rename':
-				$menu_vocab = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
-
-				$form = new FormUI( 'modify_menu' );
-				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
-					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
-					->add_validator( array( $this, 'validate_newvocab' ) )
-					->value = $menu_vocab->name;
-				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) )
-					->value = $menu_vocab->description;
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
-				$form->append( 'hidden', 'oldname' )->value = $menu_vocab->name;
-				$form->append( 'submit', 'submit', _t( 'Update Menu', 'termmenus' ) );
-				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content = $form->get();
 
 				break;
@@ -487,6 +471,9 @@ Utils::debug( $_GET, $action ); die();
 
 	public function rename_menu_form_save( $form )
 	{
+		// The name of this should probably change, since it is the on_success for the whole menu edit, no longer just for renaming.
+		// It only renames/modifies the description currently, as item adding/rearranging is done by the NestedSortable tree.
+
 		// get the menu from the form, grab the values, modify the vocabulary.
 		$menu_vocab = intval( $form->menu->value );
 		// create a term for the link, store the URL
