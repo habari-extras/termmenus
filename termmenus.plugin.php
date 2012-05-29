@@ -359,23 +359,11 @@ JAVSCRIPT_RESPONSE;
 				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ) ) )
 					->value = $vocabulary->description;
 
-				$edit_items = '<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'link_to_posts',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Link to post(s)', 'termmenus' ) . '</a>' .
-					'<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'create_link',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Link to a URL', 'termmenus' ) . '</a>' .
-					'<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
-						'page' => 'menu_iframe',
-						'action' => 'create_spacer',
-						'menu' => $vocabulary->id,
-					) ) . '">' . _t( 'Add a spacer', 'termmenus' ) . '</a>' .
-					'<script type="text/javascript">' .
-					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
+				$edit_items = self::make_edit_items( $handler, array(
+					'link_to_posts' => _t( 'Link to post(s)', 'termmenus' ),
+					'create_link' => _t( 'Link to a URL', 'termmenus' ),
+					'create_spacer' => _t( 'Add a spacer', 'termmenus' ),
+				) );
 
 				if ( !$vocabulary->is_empty() ) {
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
@@ -455,6 +443,24 @@ Utils::debug( $_GET, $action ); die();
 		$theme->display( 'menus_admin' );
 		// End everything
 		exit;
+	}
+
+	public static function make_edit_items( Adminhandler $handler, $array = array() )
+	{
+		$vocabulary = Vocabulary::get_by_id( intval( $handler->handler_vars[ 'menu' ] ) );
+		$output = "";
+		foreach( $array as $action => $text ) {
+			$output .= '<a class="modal_popup_form menu_button_dark" href="' . URL::get('admin', array(
+				'page' => 'menu_iframe',
+				'action' => $action,
+				'menu' => $vocabulary->id,
+				) ) . "\">$text</a>";
+		}
+		if ( $output !== '' ) {
+			$output .= '<script type="text/javascript">' .
+				'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
+		}
+		return $output;
 	}
 
 	public function add_menu_form_save( $form )
