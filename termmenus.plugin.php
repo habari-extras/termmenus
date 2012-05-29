@@ -517,13 +517,8 @@ Utils::debug( $term );
 					$menu->set_object_terms( 'post', $post->id, array( $term->term ) );
 				}
 			}
-			Session::notice( _t( 'Link(s) added.', 'termmenus' ) );
-			Utils::redirect(URL::get( 'admin', array(
-				'page' => 'menu_iframe',
-				'action' => 'link_to_posts',
-				'menu' => $menu_vocab,
-				'result' => 'added',
-				) ) );
+			$notice = _t( 'Link(s) added.', 'termmenus' );
+			$action = 'link_to_posts';
 		}
 		else if ( isset( $form->link_name->value ) ) {
 
@@ -535,13 +530,8 @@ Utils::debug( $term );
 			$menu->add_term( $term );
 			$term->associate( 'menu', $this->item_types[ 'url' ] );
 
-			Session::notice( _t( 'Link added.', 'termmenus' ) );
-			Utils::redirect(URL::get( 'admin', array(
-				'page' => 'menu_iframe',
-				'action' => 'create_link',
-				'menu' => $menu_vocab,
-				'result' => 'added',
-				) ) );
+			$notice = _t( 'Link added.', 'termmenus' );
+			$action = 'create_link';
 		}
 		else if ( isset( $form->spacer_text->value ) ) {
 
@@ -552,14 +542,17 @@ Utils::debug( $term );
 			$menu->add_term( $term );
 			$term->associate( 'menu', $this->item_types[ 'spacer' ] );
 
-			Session::notice( _t( 'Spacer added.', 'termmenus' ) );
-			Utils::redirect(URL::get( 'admin', array(
-				'page' => 'menu_iframe',
-				'action' => 'create_spacer',
-				'menu' => $menu_vocab,
-				'result' => 'added',
-				) ) );
+			$notice = _t( 'Spacer added.', 'termmenus' );
+			$action = 'create_spacer';
 		}
+		Session::notice( $notice );
+		Utils::redirect(URL::get( 'admin', array(
+			'page' => 'menu_iframe',
+			'action' => $action,
+			'menu' => $menu_vocab,
+			'result' => 'added',
+		) ) );
+
 	}
 
 	public function validate_newvocab( $value, $control, $form )
