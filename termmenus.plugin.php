@@ -271,45 +271,33 @@ class TermMenus extends Plugin
 	{
 		$action = isset($_GET[ 'action' ]) ? $_GET[ 'action' ] : 'create';
 		$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
+		$form = new FormUI( $action );
+		$form->class[] = 'tm_db_action';
+		$form->set_option( 'form_action', $form_action );
+		$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
+		$form->on_success( array( $this, 'menu_item_form_save' ) );
+
 		switch( $action ) {
 			case 'create_link':
-				$form = new FormUI( 'create_link' );
-				$form->class[] = 'tm_db_action';
 				$form->append( 'text', 'link_name', 'null:null', _t( 'Link Title', 'termmenus' ) )
 					->add_validator( 'validate_required', _t( 'A name is required.', 'termmenus' ) );
 				$form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
 					->add_validator( 'validate_required' )
 					->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) );
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit','submit', _t( 'Add link', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'menu_item_form_save' ) );
-				$form->set_option( 'form_action', $form_action );
 				break;
 
 			case 'create_spacer':
-				$form = new FormUI( 'create_spacer' );
-				$form->class[] = 'tm_db_action';
 				$form->append( 'text', 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
 				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add spacer', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'menu_item_form_save' ) );
-				$form->set_option( 'form_action', $form_action );
 				break;
 
 			case 'link_to_posts':
-				$form = new FormUI( 'link_to_posts' );
-				$form->class[] = 'tm_db_action';
 				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
 				$post_ids->template = 'text_tokens';
 				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
-
-				$form->append( 'hidden', 'menu' )->value = $handler->handler_vars[ 'menu' ];
 				$form->append( 'submit', 'submit', _t( 'Add post(s)', 'termmenus' ) );
-
-				$form->on_success( array( $this, 'menu_item_form_save' ) );
-				$form->set_option( 'form_action', $form_action );
 				break;
 		}
 		$form->properties['onsubmit'] = "$.post($('#{$action}').attr('action'), $('.tm_db_action').serialize(), function(data){\$('#menu_popup').html(data);});return false;";
