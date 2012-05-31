@@ -611,7 +611,7 @@ Utils::debug( $term );
 
 		// insert them into the wrapper
 		// @TODO _t() this line or replace it altogether.
-		$links = "<a class='menu_item_delete' title='Delete this' href='$delete_link'>delete</a> <a class='menu_item_edit' href='$edit_link'>edit</a>";
+		$links = "<ul class='dropbutton'><li><a title='Edit this' href='$edit_link'>edit</a></li><li><a title='Delete this' class='menu_item_delete' href='$delete_link'>delete</a></li></ul>";
 		$config[ 'wrapper' ] = "<div>%s $links</div>";
 
 		return $config;

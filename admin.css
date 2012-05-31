@@ -1,33 +1,10 @@
-.menu_item_delete {
-	background: url("../../../system/admin/images/closebutton.png") no-repeat scroll center center transparent;
-	float: right;
-	text-indent: -9999px;
-	width: 20px;
+div#tree > ol li div {
+	position: relative;
 }
-
-a.menu_item_edit,
-a.menu_item_edit:active
- {
-	float: right;
-	margin-right: 0.5em;
-	color: #fff !important;
-	background: #333;
-	padding: 2px 5px;
-	font-size: 9px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;
-	-moz-box-shadow: 1px 1px 3px #999;
-	-webkit-box-shadow: 1px 1px 3px #999;
-	box-shadow: 1px 1px 3px #999;
-	text-decoration: none;
-	font-family: 'Helvetica Neue', Helvetica, 'Lucida Grande', Arial, Verdana, Sans-Serif;
+div#tree > ol li ul.dropbutton {
+	top: 2px;
+	right: 10px;
 }
-
-a.menu_item_edit:hover {
-	background: #555;
-	text-decoration: none;
-}
-
 a.menu_button_dark,
 a.menu_button_dark:active
  {
