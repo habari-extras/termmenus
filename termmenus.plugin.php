@@ -329,7 +329,7 @@ class TermMenus extends Plugin
 					$theme->page_content .= <<< JAVSCRIPT_RESPONSE
 <script type="text/javascript">
 human_msg.display_msg('{$msg}');
-$('#edit_menu').load('{$treeurl}', function(){findChildren();controls.init();});
+$('#edit_menu').load('{$treeurl}', habari.menu_admin.init_form);
 </script>
 JAVSCRIPT_RESPONSE;
 			}
@@ -380,8 +380,6 @@ JAVSCRIPT_RESPONSE;
 						'menu' => $vocabulary->id,
 					) ) . "\">$text</a>";
 				}
-				$edit_items .= '<script type="text/javascript">' .
-					'$("a.modal_popup_form").click(function(){$("#menu_popup").load($(this).attr("href")).dialog({title:$(this).text()}); return false;});</script>';
 
 				if ( !$vocabulary->is_empty() ) {
 					$form->append( 'tree', 'tree', $vocabulary->get_tree(), _t( 'Menu', 'termmenus') );
