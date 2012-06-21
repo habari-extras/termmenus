@@ -490,6 +490,8 @@ Utils::debug( $term_type, $this->item_types );
 		$menu->description = $form->description->value; // no Vocabulary function for this
 		$menu->update();
 
+		$form->save();
+
 		Session::notice( _t( 'Updated menu "%s".', array( $form->menuname->value ), 'termmenus' ) );
 		Utils::redirect( URL::get( 'admin', array(
 			'page' => 'menus',
