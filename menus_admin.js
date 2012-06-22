@@ -5,6 +5,7 @@ habari.menu_admin = {
 			$('.tm_db_action').serialize(),
 			function(data){
 				$('#menu_popup').html(data);
+				console.log(data);
 			}
 		);
 		return false;
