@@ -31,10 +31,9 @@ class TermMenus extends Plugin
 		$group = UserGroup::get_by_name( 'admin' );
 		$group->grant( 'manage_menus' );
 
-		// register a menu type
+		// register menu types
 		Vocabulary::add_object_type( 'menu_link' );
 		Vocabulary::add_object_type( 'menu_spacer' );
-		//Vocabulary::add_object_type( 'menu_link_to_post' );
 	}
 
 	/**
@@ -214,14 +213,14 @@ class TermMenus extends Plugin
 
 		// add to main menu
 		$item_menu = array( 'menus' =>
-		array(
-			'url' => URL::get( 'admin', 'page=menus' ),
-			'title' => _t( 'Menus', 'termmenus' ),
-			'text' => _t( 'Menus', 'termmenus' ),
-			'hotkey' => 'E',
-			'selected' => false,
-			'submenu' => $menus_array,
-		)
+			array(
+				'url' => URL::get( 'admin', 'page=menus' ),
+				'title' => _t( 'Menus', 'termmenus' ),
+				'text' => _t( 'Menus', 'termmenus' ),
+				'hotkey' => 'E',
+				'selected' => false,
+				'submenu' => $menus_array,
+			)
 		);
 
 		$slice_point = array_search( 'themes', array_keys( $menu ) ); // Element will be inserted before "themes"
@@ -373,6 +372,13 @@ class TermMenus extends Plugin
 					}
 				}
 				Session::notice(_t( 'Link(s) added.', 'termmenus' ));
+			},
+			'render' => function($term, $object_id, $config) {
+				$result = array();
+				if($post = Post::get($object_id)) {
+					$result['link'] = $post->permalink;
+				}
+				return $result;
 			}
 		);
 		return $menu_type_data;
@@ -567,7 +573,10 @@ Utils::debug( $term_type, $this->item_types );
 		$params = array(
 			'name' => $form->menuname->value,
 			'description' => ( $form->description->value === '' ? _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ) : $form->description->value ),
-			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
+			'features' => array(
+				'term_menu', // a special feature that marks the vocabulary as a menu, but has no functional purpose
+				'unique', // a special feature that applies a one-to-one relationship between term and object, enforced by the Vocabulary class
+			),
 		);
 		$vocab = Vocabulary::create( $params );
 
@@ -701,8 +710,6 @@ Utils::debug( $term_type, $this->item_types );
 	public function render_menu_item( Term $term, $config )
 	{
 		$title = $term->term_display;
-		$link = '';
-		$objects = $term->object_types();
 
 		$active = false;
 
@@ -711,54 +718,26 @@ Utils::debug( $term_type, $this->item_types );
 		$spacer = false;
 		$active = false;
 		$link = null;
-		foreach( $objects as $object_id => $type ) {
-			if(isset($menu_type_data[$type]['render'])) {
-				$result = $menu_type_data[$type]['render']($term, $object_id, $config);
-				$result = array_intersect_key(
-					$result,
-					array(
-						'link' => 1,
-						'title' => 1,
-						'active' => 1,
-						'spacer' => 1,
-						'config' => 1,
-					)
-				);
-				extract($result);
-			}
-/*			switch( $type ) {
-				case 'post':
-					$post = Post::get( array( 'id' => $object_id ) );
-					if( $post instanceof Post ) {
-						$link = $post->permalink;
-						if( $config[ 'theme' ]->posts instanceof Post && $config[ 'theme' ]->posts->id == $post->id ) {
-							$active = true;
-						}
-					}
-					else {
-						// The post doesn't exist or the user does not have access to it
-					}
-					break;
-				case 'menu':
-					$item_types = $this->get_menu_type_data();
-					switch( $object_id ) {
-						case $item_types[ 'url' ]:
-							$link = $term->info->url;
-							break;
-						case $item_types[ 'spacer' ]:
-							if ( empty( $term->term_display ) ) {
-								$title = '&nbsp;';
-							}
-							$spacer = true;
-						// no need to break, default below is just fine.
-						default:
-							$link = null;
-							$link = Plugins::filter( 'get_item_link', $link, $term, $object_id, $type );
-							break;
-					}
-					break;
-			}*/
+		if(!isset($term->object_id)) {
+			$objects = $term->object_types();
+			$term->type = reset($objects);
+			$term->object_id = key($objects);
 		}
+		if(isset($menu_type_data[$term->type]['render'])) {
+			$result = $menu_type_data[$term->type]['render']($term, $term->object_id, $config);
+			$result = array_intersect_key(
+				$result,
+				array(
+					'link' => 1,
+					'title' => 1,
+					'active' => 1,
+					'spacer' => 1,
+					'config' => 1,
+				)
+			);
+			extract($result);
+		}
+
 		if( empty( $link ) ) {
 			$config[ 'wrapper' ] = sprintf($config[ 'linkwrapper' ], $title);
 		}
