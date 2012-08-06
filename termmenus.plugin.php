@@ -575,7 +575,7 @@ JAVSCRIPT_RESPONSE;
 	{
 		$params = array(
 			'name' => $form->menuname->value,
-			'description' => ( $form->description->value === '' ? _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ) : $form->description->value ),
+			'description' => $form->description->value,
 			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
 		$vocab = Vocabulary::create( $params );
