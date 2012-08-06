@@ -526,6 +526,8 @@ JAVSCRIPT_RESPONSE;
 				else {
 					$form->append( 'static', 'buttons', _t( "<div id='menu_item_button_container'>$edit_items</div>", 'termmenus' ) );
 				}
+				$delete_link = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'delete_menu', 'menu' => $handler->handler_vars[ 'menu' ] ) );
+				$form->append( 'static', 'deletebutton', _t( "<a class='a_button' href='$delete_link'>Delete Menu</a>", 'termmenus' ) );
 				$form->append( new FormControlHidden( 'menu', 'null:null' ) )->value = $handler->handler_vars[ 'menu' ];
 				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content .= $form->get();
@@ -548,7 +550,8 @@ JAVSCRIPT_RESPONSE;
 				$menu_vocab->delete();
 				// log that it has been deleted?
 				Session::notice( _t( 'Menu deleted.', 'termmenus' ) );
-				Utils::redirect( URL::get( 'admin', 'page=menus' ) );
+				// redirect to a blank menu creation form
+				Utils::redirect( URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ) );
 				break;
 
 			case 'delete_term':
