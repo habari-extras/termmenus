@@ -435,7 +435,7 @@ class TermMenus extends Plugin
 		if ( isset( $handler->handler_vars[ 'term' ] ) ) {
 			$term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
 			$object_types = $term->object_types();
-			$action = $object_types[ 0 ]; // the 'menu_whatever' we seek should be the only element in the array.
+			$action = $object_types[0]->type; // the 'menu_whatever' we seek should be the only element in the array.
 			$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'term' => $handler->handler_vars[ 'term' ], 'action' => "$action" ) );
 		} else {
 			$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => "$action" ) );
@@ -618,7 +618,7 @@ JAVSCRIPT_RESPONSE;
 			$term = Term::get( intval( (string) $form->term->value ) );
 			// maybe we should check if term exists? Or put that in the conditional above?
 			$object_types = $term->object_types();
-			$type = $object_types[0]; // that's twice we've grabbed the $term->object_types()[0]. Maybe this is a job for a function?
+			$type = $object_types[0]->type; // that's twice we've grabbed the $term->object_types()[0]. Maybe this is a job for a function?
 
 			if(isset($menu_type_data[$type]['save'])) {
 				$menu_type_data[$type]['save']($menu, $form);
