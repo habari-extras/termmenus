@@ -125,3 +125,10 @@ input[type="submit"] {
 	display: block;
 	clear: both;
 }
+
+form#menu_item_edit .helptext {
+	font-style: italic;
+	color: #999;
+	clear: both;
+	margin-left: 25%;
+}

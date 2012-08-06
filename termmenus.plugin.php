@@ -48,6 +48,7 @@ class TermMenus extends Plugin
 
 		// formcontrol for tokens
 		$this->add_template( 'text_tokens', dirname( __FILE__ ) . '/formcontrol_tokens.php' );
+		$this->add_template( 'transparent_text', dirname( __FILE__ ) . '/admincontrol_text_transparent.php' );
 
 		// i18n
 		$this->load_text_domain( 'termmenus' );
@@ -330,7 +331,8 @@ class TermMenus extends Plugin
 		$menu_type_data['menu_spacer'] = array(
 			'label' => _t('Spacer', 'termmenus'),
 			'form' => function($form, $term) {
-				$spacer = new FormControlText( 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
+				$spacer = new FormControlText( 'spacer_text', 'null:null', _t( 'Item text', 'termmenus' ), 'optionscontrol_text' );
+				$spacer->helptext = _t( 'Leave blank for blank space', 'termmenus' );
 				if ( $term ) {
 					$spacer->value = $term->term_display;
 					$form->append( 'hidden', 'term' )->value = $term->id;
@@ -460,13 +462,13 @@ JAVSCRIPT_RESPONSE;
 
 				$form = new FormUI( 'edit_menu' );
 
-				$form->append( new FormControlText( 'menuname', 'null:null', _t( 'Name', 'termmenus' ) ) )
+				$form->append( new FormControlText( 'menuname', 'null:null', _t( 'Name', 'termmenus' ), 'transparent_text' ) )
 					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
 					->add_validator( array( $this, 'validate_newvocab' ) )
 					->value = $vocabulary->name;
 				$form->append( new FormControlHidden( 'oldname', 'null:null' ) )->value = $vocabulary->name;
 
-				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ) ) )
+				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ), 'transparent_text' ) )
 					->value = $vocabulary->description;
 
 				$edit_items_array = $this->get_menu_type_data();
@@ -499,10 +501,10 @@ JAVSCRIPT_RESPONSE;
 
 			case 'create':
 				$form = new FormUI('create_menu');
-				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
+				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ), 'transparent_text' )
 					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
 					->add_validator( array($this, 'validate_newvocab' ) );
-				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
+				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ), 'transparent_text' );
 				$form->append( 'submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
 				$form->on_success( array( $this, 'add_menu_form_save' ) );
 				$theme->page_content = $form->get();
