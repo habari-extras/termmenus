@@ -587,6 +587,8 @@ JAVSCRIPT_RESPONSE;
 	public function term_form_save( $form )
 	{
 		$menu_vocab = intval( $form->menu->value );
+		$menu = Vocabulary::get_by_id( $menu_vocab );
+		$menu_type_data = $this->get_menu_type_data();
 
 		if ( isset( $form->term ) ) {
 			$term = Term::get( intval( (string) $form->term->value ) );
@@ -594,8 +596,6 @@ JAVSCRIPT_RESPONSE;
 			$object_types = $term->object_types();
 			$type = $object_types[0]; // that's twice we've grabbed the $term->object_types()[0]. Maybe this is a job for a function?
 
-			$menu = Vocabulary::get_by_id( $menu_vocab );
-			$menu_type_data = $this->get_menu_type_data();
 			if(isset($menu_type_data[$type]['save'])) {
 				$menu_type_data[$type]['save']($menu, $form);
 			}
@@ -603,14 +603,13 @@ JAVSCRIPT_RESPONSE;
 		}
 		else { // if no term is set, create a new item.
 			// create a term for the link, store the URL
-			$menu = Vocabulary::get_by_id( $menu_vocab );
 
-			$menu_type_data = $this->get_menu_type_data();
 			$type = $form->menu_type->value;
 			if(isset($menu_type_data[$type]['save'])) {
 				$menu_type_data[$type]['save']($menu, $form);
 			}
 
+			// if not for this redirect, this whole if/else could be simplified considerably.
 			Utils::redirect(URL::get( 'admin', array(
 				'page' => 'menu_iframe',
 				'action' => $type,
@@ -618,8 +617,6 @@ JAVSCRIPT_RESPONSE;
 				'result' => 'added',
 			) ) );
 		}
-//		Utils::debug( $type, $term );
-//		Utils::debug( $term->info->url );
 	}
 
 	public function validate_newvocab( $value, $control, $form )
