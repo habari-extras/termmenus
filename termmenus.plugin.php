@@ -309,17 +309,38 @@ class TermMenus extends Plugin
 				$form->append( $link_url );
 			},
 			'save' => function($menu, $form) {
-				$term = new Term(array(
-					'term_display' => $form->link_name->value,
-					'term' => Utils::slugify($form->link_name->value),
-				));
-				$term->info->type = "link";
-				$term->info->url = $form->link_url->value;
-				$term->info->menu = $menu->id;
-				$menu->add_term($term);
-				$term->associate('menu_link', 0);
+				if ( !$form->term->value ) {
+					$term = new Term(array(
+						'term_display' => $form->link_name->value,
+						'term' => Utils::slugify($form->link_name->value),
+					));
+					$term->info->type = "link";
+					$term->info->url = $form->link_url->value;
+					$term->info->menu = $menu->id;
+					$menu->add_term($term);
+					$term->associate('menu_link', 0);
 
-				Session::notice(_t('Link added.', 'termmenus'));
+					Session::notice(_t('Link added.', 'termmenus'));
+				} else 	{
+					$term = Term::get( intval( $form->term->value ) );
+					$updated = false;
+					if ( $term->info->url !== $form->link_url->value ) {
+						$term->info->url = $form->link_url->value;
+						$updated = true;
+					}
+					if ( $form->link_name->value !== $term->term_display ) {
+						$term->term_display = $form->link_name->value;
+						$term->term = Utils::slugify( $form->link_name->value );
+						$updated = true;
+					}
+
+					$term->info->url = $form->link_url->value;
+
+					if ( $updated ) {
+						$term->update();
+						Session::notice( _t( 'Link updated.', 'termmenus' ) );
+					}
+				}
 			},
 			'render' => function($term, $object_id, $config) {
 				$result = array(
