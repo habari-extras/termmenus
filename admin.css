@@ -114,5 +114,14 @@ body.page-menus div#menu_form.container {
 body.page-menus #menu_form.container label {
 	display: inline-block;
 	width: 7em;
+	float: left;
 }
 
+ol.tree {
+	border: 1px solid #999;
+}
+
+input[type="submit"] {
+	display: block;
+	clear: both;
+}
