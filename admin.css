@@ -36,7 +36,7 @@ div#menu_form #description {
 div#menu_item_button_container  {
 	padding: 6px 3px 8px 3px;
 	background: #999;
-	margin: 0 0 0 15px;
+	margin: 0 0 15px 15px;
 }
 
 div#title.formcontrol label,
@@ -114,5 +114,45 @@ body.page-menus div#menu_form.container {
 body.page-menus #menu_form.container label {
 	display: inline-block;
 	width: 7em;
+	float: left;
+}
+
+ol.tree {
+	border: 1px solid #999;
+}
+
+input[type="submit"] {
+	display: block;
+	clear: both;
+}
+
+form#menu_item_edit .helptext {
+	font-style: italic;
+	color: #999;
+	clear: both;
+	margin-left: 25%;
+}
+
+.a_button { /* needs a better name. */
+	padding: 2px 4px 2px 4px;
+	cursor: pointer;
+	border-radius: 9px;
+	-webkit-border-radius: 9px;
+	-moz-border-radius: 9px;
+	font-size: 10px;
+	background: transparent url('../../../system/admin/images/button_background.png') repeat-x; /* @TODO fix this url when this goes into core */
+	border: 1px solid #B3B3B3;
+	text-align: center;
+}
+
+.a_button:hover {
+	border: 1px solid #555;
+	background-position: 0 -30px;
+}
+
+a.a_button {
+	text-decoration: none;
+	display: inline-block;
+	min-width: 110px;
 }
 

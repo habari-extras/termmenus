@@ -47,6 +47,7 @@ class TermMenus extends Plugin
 
 		// formcontrol for tokens
 		$this->add_template( 'text_tokens', dirname( __FILE__ ) . '/formcontrol_tokens.php' );
+		$this->add_template( 'transparent_text', dirname( __FILE__ ) . '/admincontrol_text_transparent.php' );
 
 		// i18n
 		$this->load_text_domain( 'termmenus' );
@@ -307,17 +308,38 @@ class TermMenus extends Plugin
 				$form->append( $link_url );
 			},
 			'save' => function($menu, $form) {
-				$term = new Term(array(
-					'term_display' => $form->link_name->value,
-					'term' => Utils::slugify($form->link_name->value),
-				));
-				$term->info->type = "link";
-				$term->info->url = $form->link_url->value;
-				$term->info->menu = $menu->id;
-				$menu->add_term($term);
-				$term->associate('menu_link', 0);
+				if ( !$form->term->value ) {
+					$term = new Term(array(
+						'term_display' => $form->link_name->value,
+						'term' => Utils::slugify($form->link_name->value),
+					));
+					$term->info->type = "link";
+					$term->info->url = $form->link_url->value;
+					$term->info->menu = $menu->id;
+					$menu->add_term($term);
+					$term->associate('menu_link', 0);
 
-				Session::notice(_t('Link added.', 'termmenus'));
+					Session::notice(_t('Link added.', 'termmenus'));
+				} else 	{
+					$term = Term::get( intval( $form->term->value ) );
+					$updated = false;
+					if ( $term->info->url !== $form->link_url->value ) {
+						$term->info->url = $form->link_url->value;
+						$updated = true;
+					}
+					if ( $form->link_name->value !== $term->term_display ) {
+						$term->term_display = $form->link_name->value;
+						$term->term = Utils::slugify( $form->link_name->value );
+						$updated = true;
+					}
+
+					$term->info->url = $form->link_url->value;
+
+					if ( $updated ) {
+						$term->update();
+						Session::notice( _t( 'Link updated.', 'termmenus' ) );
+					}
+				}
 			},
 			'render' => function($term, $object_id, $config) {
 				$result = array(
@@ -329,7 +351,8 @@ class TermMenus extends Plugin
 		$menu_type_data['menu_spacer'] = array(
 			'label' => _t('Spacer', 'termmenus'),
 			'form' => function($form, $term) {
-				$spacer = new FormControlText( 'spacer_text', 'null:null', _t( 'Item text (leave blank for blank space)', 'termmenus' ) );
+				$spacer = new FormControlText( 'spacer_text', 'null:null', _t( 'Item text', 'termmenus' ), 'optionscontrol_text' );
+				$spacer->helptext = _t( 'Leave blank for blank space', 'termmenus' );
 				if ( $term ) {
 					$spacer->value = $term->term_display;
 					$form->append( 'hidden', 'term' )->value = $term->id;
@@ -338,16 +361,25 @@ class TermMenus extends Plugin
 				$form->append( $spacer );
 			},
 			'save' => function($menu, $form) {
-				$term = new Term(array(
-					'term_display' => ($form->spacer_text->value !== '' ? $form->spacer_text->value : '&nbsp;'), // totally blank values collapse the term display in the formcontrol
-					'term' => Utils::slugify(($form->spacer_text->value !== '' ? $form->spacer_text->value : 'menu_spacer')),
-				));
-				$term->info->type = "spacer";
-				$term->info->menu = $menu->id;
-				$menu->add_term($term);
-				$term->associate('menu_spacer', 0);
+				if ( !$form->term->value ) {
+					$term = new Term(array(
+						'term_display' => ($form->spacer_text->value !== '' ? $form->spacer_text->value : '&nbsp;'), // totally blank values collapse the term display in the formcontrol
+						'term' => Utils::slugify(($form->spacer_text->value !== '' ? $form->spacer_text->value : 'menu_spacer')),
+					));
+					$term->info->type = "spacer";
+					$term->info->menu = $menu->id;
+					$menu->add_term($term);
+					$term->associate('menu_spacer', 0);
 
-				Session::notice(_t('Spacer added.', 'termmenus'));
+					Session::notice(_t('Spacer added.', 'termmenus'));
+				} else {
+					$term = Term::get( intval( $form->term->value ) );
+					if ($form->spacer_text->value !== $term->term_display ) {
+						$term->term_display = $form->spacer_text->value;
+						$term->update();
+						Session::notice( _t( 'Spacer updated.', 'termmenus' ) );
+					}
+				}
 			}
 		);
 		$menu_type_data['post'] = array(
@@ -408,10 +440,12 @@ class TermMenus extends Plugin
 		$term = null;
 		if ( isset( $handler->handler_vars[ 'term' ] ) ) {
 			$term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
-			$action = $term->info->type;
+			$object_types = $term->object_types();
+			$action = $object_types[0]->type; // the 'menu_whatever' we seek should be the only element in the array.
+			$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'term' => $handler->handler_vars[ 'term' ], 'action' => "$action" ) );
+		} else {
+			$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => "$action" ) );
 		}
-//Utils::debug( $term, $handler->handler_vars );
-		$form_action = URL::get( 'admin', array( 'page' => 'menu_iframe', 'menu' => $handler->handler_vars[ 'menu' ], 'action' => $action ) );
 		$form = new FormUI( 'menu_item_edit', $action );
 		$form->class[] = 'tm_db_action';
 		$form->set_option( 'form_action', $form_action );
@@ -466,13 +500,13 @@ JAVSCRIPT_RESPONSE;
 
 				$form = new FormUI( 'edit_menu' );
 
-				$form->append( new FormControlText( 'menuname', 'null:null', _t( 'Name', 'termmenus' ) ) )
+				$form->append( new FormControlText( 'menuname', 'null:null', _t( 'Name', 'termmenus' ), 'transparent_text' ) )
 					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
 					->add_validator( array( $this, 'validate_newvocab' ) )
 					->value = $vocabulary->name;
 				$form->append( new FormControlHidden( 'oldname', 'null:null' ) )->value = $vocabulary->name;
 
-				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ) ) )
+				$form->append( new FormControlText( 'description', 'null:null', _t( 'Description', 'termmenus' ), 'transparent_text' ) )
 					->value = $vocabulary->description;
 
 				$edit_items_array = $this->get_menu_type_data();
@@ -498,6 +532,8 @@ JAVSCRIPT_RESPONSE;
 				else {
 					$form->append( 'static', 'buttons', _t( "<div id='menu_item_button_container'>$edit_items</div>", 'termmenus' ) );
 				}
+				$delete_link = URL::get( 'admin', array( 'page' => 'menus', 'action' => 'delete_menu', 'menu' => $handler->handler_vars[ 'menu' ] ) );
+				$form->append( 'static', 'deletebutton', _t( "<a class='a_button' href='$delete_link'>Delete Menu</a>", 'termmenus' ) );
 				$form->append( new FormControlHidden( 'menu', 'null:null' ) )->value = $handler->handler_vars[ 'menu' ];
 				$form->on_success( array( $this, 'rename_menu_form_save' ) );
 				$theme->page_content .= $form->get();
@@ -505,10 +541,10 @@ JAVSCRIPT_RESPONSE;
 
 			case 'create':
 				$form = new FormUI('create_menu');
-				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ) )
+				$form->append( 'text', 'menuname', 'null:null', _t( 'Menu Name', 'termmenus' ), 'transparent_text' )
 					->add_validator( 'validate_required', _t( 'You must supply a valid menu name', 'termmenus' ) )
 					->add_validator( array($this, 'validate_newvocab' ) );
-				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ) );
+				$form->append( 'text', 'description', 'null:null', _t( 'Description', 'termmenus' ), 'transparent_text' );
 				$form->append( 'submit', 'submit', _t( 'Create Menu', 'termmenus' ) );
 				$form->on_success( array( $this, 'add_menu_form_save' ) );
 				$theme->page_content = $form->get();
@@ -520,7 +556,8 @@ JAVSCRIPT_RESPONSE;
 				$menu_vocab->delete();
 				// log that it has been deleted?
 				Session::notice( _t( 'Menu deleted.', 'termmenus' ) );
-				Utils::redirect( URL::get( 'admin', 'page=menus' ) );
+				// redirect to a blank menu creation form
+				Utils::redirect( URL::get( 'admin', array( 'page' => 'menus', 'action' => 'create' ) ) );
 				break;
 
 			case 'delete_term':
@@ -531,34 +568,6 @@ JAVSCRIPT_RESPONSE;
 				Session::notice( _t( 'Item deleted.', 'termmenus' ) );
 				Utils::redirect( URL::get( 'admin', array( 'page' => 'menus', 'action' => 'edit', 'menu' => $menu_vocab ) ) );
 				break;
-			/*
-		 case 'edit_term':
-			 $term = Term::get( intval( $handler->handler_vars[ 'term' ] ) );
-			 $menu_vocab = $term->vocabulary_id;
-			 $term_type = '';
-Utils::debug( $term, $term->object_types() );
-			 foreach( $term->object_types() as $object_id => $type ) {
-				 // render_menu_item() does this as a foreach. I'm assuming there's only one type here, but I could be wrong. Is there a better way?
-				 $term_type = array_search( $object_id, $this->item_types );;
-			 }
-Utils::debug( $term_type, $this->item_types );
-			 $form = new FormUI( 'edit_term' );
-			 $form->append( 'text', 'title', 'null:null', ( $term_type !== 'spacer' ? _t( 'Item Title', 'termmenus' ) : _t( 'Spacer Text', 'termmenus' ) ) )
-				 ->add_validator( 'validate_required' )
-				 ->value = $term->term_display;
-			 if ( $term_type == 'url' ) {
-				 $form->append( 'text', 'link_url', 'null:null', _t( 'Link URL', 'termmenus' ) )
-					 ->add_validator( 'validate_required' )
-					 ->add_validator( 'validate_url', _t( 'You must supply a valid URL.', 'termmenus' ) )
-					 ->value = $term->info->url;
-			 }
-			 $form->append( 'hidden', 'term' )->value = $term->id;
-			 $form->append( 'hidden', 'type' )->value = intval( $term_type );
-			 $form->append( 'submit', 'submit', _t( 'Apply Changes', 'termmenus' ) );
-			 $form->on_success( array( $this, 'term_form_save' ) );
-			 $theme->page_content = $form->get();
-
-			 break;*/
 			default:
 				Utils::debug( $_GET, $action ); die();
 		}
@@ -572,11 +581,8 @@ Utils::debug( $term_type, $this->item_types );
 	{
 		$params = array(
 			'name' => $form->menuname->value,
-			'description' => ( $form->description->value === '' ? _t( 'A vocabulary for the "%s" menu', array( $form->menuname->value ), 'termmenus' ) : $form->description->value ),
-			'features' => array(
-				'term_menu', // a special feature that marks the vocabulary as a menu, but has no functional purpose
-				'unique', // a special feature that applies a one-to-one relationship between term and object, enforced by the Vocabulary class
-			),
+			'description' => $form->description->value,
+			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
 		);
 		$vocab = Vocabulary::create( $params );
 
@@ -611,21 +617,29 @@ Utils::debug( $term_type, $this->item_types );
 	public function term_form_save( $form )
 	{
 		$menu_vocab = intval( $form->menu->value );
+		$menu = Vocabulary::get_by_id( $menu_vocab );
+		$menu_type_data = $this->get_menu_type_data();
 
 		if ( isset( $form->term ) ) {
 			$term = Term::get( intval( (string) $form->term->value ) );
-//			$type = $form->type->value;
+			// maybe we should check if term exists? Or put that in the conditional above?
+			$object_types = $term->object_types();
+			$type = $object_types[0]->type; // that's twice we've grabbed the $term->object_types()[0]. Maybe this is a job for a function?
+
+			if(isset($menu_type_data[$type]['save'])) {
+				$menu_type_data[$type]['save']($menu, $form);
+			}
+
 		}
 		else { // if no term is set, create a new item.
 			// create a term for the link, store the URL
-			$menu = Vocabulary::get_by_id( $menu_vocab );
 
-			$menu_type_data = $this->get_menu_type_data();
 			$type = $form->menu_type->value;
 			if(isset($menu_type_data[$type]['save'])) {
 				$menu_type_data[$type]['save']($menu, $form);
 			}
 
+			// if not for this redirect, this whole if/else could be simplified considerably.
 			Utils::redirect(URL::get( 'admin', array(
 				'page' => 'menu_iframe',
 				'action' => $type,
@@ -633,8 +647,6 @@ Utils::debug( $term_type, $this->item_types );
 				'result' => 'added',
 			) ) );
 		}
-		Utils::debug( $type, $term );
-		Utils::debug( $term->info->url );
 	}
 
 	public function validate_newvocab( $value, $control, $form )
@@ -685,7 +697,7 @@ Utils::debug( $term_type, $this->item_types );
 		// make the links
 		$edit_link = URL::get( 'admin', array(
 			'page' => 'menu_iframe',
-			'action' => 'edit_term',
+			'action' => $term->info->type,
 			'term' => $term->id,
 			'menu' => $term->info->menu,
 		) );
