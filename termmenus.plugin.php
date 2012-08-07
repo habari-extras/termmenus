@@ -735,8 +735,8 @@ JAVSCRIPT_RESPONSE;
 			$term->type = reset($objects);
 			$term->object_id = key($objects);
 		}
-		if(isset($menu_type_data[$term->type]['render'])) {
-			$result = $menu_type_data[$term->type]['render']($term, $term->object_id, $config);
+		if(isset($menu_type_data[$term->type->type]['render'])) {
+			$result = $menu_type_data[$term->type->type]['render']($term, $term->object_id, $config);
 			$result = array_intersect_key(
 				$result,
 				array(
