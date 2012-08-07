@@ -385,25 +385,48 @@ class TermMenus extends Plugin
 		$menu_type_data['post'] = array(
 			'label' => _t('Links to Posts', 'termmenus'),
 			'form' => function($form, $term) {
-				$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
-				$post_ids->template = 'text_tokens';
-				$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
+				if ( $term ) {
+					$object_types = $term->object_types();
+					$term_object = reset( $object_types );
+
+					$post_display = $form->append( 'text', 'term_display', 'null:null', _t( 'Title to display', 'termmenus' ) );
+					$post_display->value = $term->term_display;
+					$post_display->disabled = 'disabled';
+					$post = Post::get( $term_object->object_id );
+					$post_term = $form->append( 'static', 'post_link', _t( "Links to <a target='_blank' href='{$post->permalink}'>{$post->title}</a>", 'termmenus' ) );
+					$form->append( 'hidden', 'term' )->value = $term->id;
+				}
+				else {
+					$post_ids = $form->append( 'text', 'post_ids', 'null:null', _t( 'Posts', 'termmenus' ) );
+					$post_ids->template = 'text_tokens';
+					$post_ids->ready_function = "$('#{$post_ids->field}').tokenInput( habari.url.ajaxPostTokens )";
+				}
 			},
 			'save' => function($menu, $form) {
-				$post_ids = explode( ',', $form->post_ids->value );
-				foreach( $post_ids as $post_id ) {
-					$post = Post::get( array( 'id' => $post_id ) );
-					$term_title = $post->title;
+				if ( !$form->term->value )  {
+					$post_ids = explode( ',', $form->post_ids->value );
+					foreach( $post_ids as $post_id ) {
+						$post = Post::get( array( 'id' => $post_id ) );
+						$term_title = $post->title;
 
-					$terms = $menu->get_object_terms( 'post', $post->id );
-					if( count( $terms ) == 0 ) {
-						$term = new Term( array( 'term_display' => $post->title, 'term' => $post->slug ) );
-						$term->info->menu = $menu->id;
-						$menu->add_term( $term );
-						$menu->set_object_terms( 'post', $post->id, array( $term->term ) );
+						$terms = $menu->get_object_terms( 'post', $post->id );
+						if( count( $terms ) == 0 ) {
+							$term = new Term( array( 'term_display' => $post->title, 'term' => $post->slug ) );
+							$term->info->menu = $menu->id;
+							$menu->add_term( $term );
+							$menu->set_object_terms( 'post', $post->id, array( $term->term ) );
+						}
+					}
+					Session::notice(_t( 'Link(s) added.', 'termmenus' ));
+				}
+				else {
+					$term = Term::get( intval( $form->term->value ) );
+					if ($form->term_display->value !== $term->term_display ) {
+						$term->term_display = $form->term_display->value;
+						$term->update();
+						Session::notice( _t( 'Link updated.', 'termmenus' ) );
 					}
 				}
-				Session::notice(_t( 'Link(s) added.', 'termmenus' ));
 			},
 			'render' => function($term, $object_id, $config) {
 				$result = array();
