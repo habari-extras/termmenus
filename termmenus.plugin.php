@@ -582,7 +582,10 @@ JAVSCRIPT_RESPONSE;
 		$params = array(
 			'name' => $form->menuname->value,
 			'description' => $form->description->value,
-			'features' => array( 'term_menu' ), // a special feature that marks the vocabulary as a menu
+			'features' => array(
+				'term_menu', // a special feature that marks the vocabulary as a menu, but has no functional purpose
+				'unique', // a special feature that applies a one-to-one relationship between term and object, enforced by the Vocabulary class
+			),
 		);
 		$vocab = Vocabulary::create( $params );
 
