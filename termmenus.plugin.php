@@ -389,7 +389,7 @@ class TermMenus extends Plugin
 					$object_types = $term->object_types();
 					$term_object = reset( $object_types );
 
-					$post_display = $form->append( 'text', 'term_display', 'null:null', _t( 'Title to display', 'termmenus' ) );
+					$post_display = $form->append( 'text', 'title', 'null:null', _t( 'Title to display', 'termmenus' ) );
 					$post_display->value = $term->term_display;
 					$post_display->disabled = 'disabled';
 					$post = Post::get( $term_object->object_id );
@@ -421,8 +421,8 @@ class TermMenus extends Plugin
 				}
 				else {
 					$term = Term::get( intval( $form->term->value ) );
-					if ($form->term_display->value !== $term->term_display ) {
-						$term->term_display = $form->term_display->value;
+					if ($form->title->value !== $term->term_display ) {
+						$term->term_display = $form->title->value;
 						$term->update();
 						Session::notice( _t( 'Link updated.', 'termmenus' ) );
 					}
