@@ -5,10 +5,18 @@ habari.menu_admin = {
 			$('.tm_db_action').serialize(),
 			function(data){
 				$('#menu_popup').html(data);
-				console.log(data);
 			}
 		);
 		return false;
+	},
+	submit_menu_update: function(el) {
+		$.post(
+			$(el).attr('action'),
+			$(el).serialize(),
+			function(data){
+				$('#menu_popup').html(data);
+			}
+		);
 	},
 	init_link_buttons: function() {
 		$("a.modal_popup_form").click(

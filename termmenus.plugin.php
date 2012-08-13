@@ -389,7 +389,7 @@ class TermMenus extends Plugin
 					$object_types = $term->object_types();
 					$term_object = reset( $object_types );
 
-					$post_display = $form->append( 'text', 'title', 'null:null', _t( 'Title to display', 'termmenus' ) );
+					$post_display = $form->append( 'text', 'term_display', 'null:null', _t( 'Title to display', 'termmenus' ) );
 					$post_display->value = $term->term_display;
 					$post_display->disabled = 'disabled';
 					$post = Post::get( $term_object->object_id );
@@ -421,8 +421,8 @@ class TermMenus extends Plugin
 				}
 				else {
 					$term = Term::get( intval( $form->term->value ) );
-					if ($form->title->value !== $term->term_display ) {
-						$term->term_display = $form->title->value;
+					if ($form->term_display->value !== $term->term_display ) {
+						$term->term_display = $form->term_display->value;
 						$term->update();
 						Session::notice( _t( 'Link updated.', 'termmenus' ) );
 					}
@@ -483,7 +483,7 @@ class TermMenus extends Plugin
 			$form->append( 'submit', 'submit', _t( '%1$s %2$s', array( $term ? _t( 'Update', 'termmenus' ) : _t( 'Add', 'termmenus' ), $menu_types[$action]['label'] ), 'termmenus' ) );
 		}
 
-		$form->properties['onsubmit'] = "return habari.menu_admin.submit_menu_item_edit()";
+		$form->properties['onsubmit'] = "return habari.menu_admin.submit_menu_item_edit(this)";
 
 		$theme->page_content = $form->get();
 
@@ -498,6 +498,7 @@ human_msg.display_msg('{$msg}');
 $('#edit_menu').load('{$treeurl}', habari.menu_admin.init_form);
 </script>
 JAVSCRIPT_RESPONSE;
+					break;
 			}
 		}
 		$theme->display( 'menu_iframe' );
@@ -559,6 +560,7 @@ JAVSCRIPT_RESPONSE;
 				$form->append( 'static', 'deletebutton', _t( "<a class='a_button' href='$delete_link'>Delete Menu</a>", 'termmenus' ) );
 				$form->append( new FormControlHidden( 'menu', 'null:null' ) )->value = $handler->handler_vars[ 'menu' ];
 				$form->on_success( array( $this, 'rename_menu_form_save' ) );
+				$form->properties['onsubmit'] = "return habari.menu_admin.submit_menu_update();";
 				$theme->page_content .= $form->get();
 				break;
 
